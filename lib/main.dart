@@ -48,7 +48,7 @@ final List<dynamic> stations = await fetchApiData();
       home: GoogleMap(
         onMapCreated: (GoogleMapController controller) {},
         initialCameraPosition: const CameraPosition(
-          target: LatLng(52.237049, 21.017532), // Przykładowe współrzędne środkowe dla Polski
+          target: LatLng(52.237049, 21.017532),
           zoom: 5,
         ),
         markers: _markers.values.toSet(),
@@ -56,6 +56,5 @@ final List<dynamic> stations = await fetchApiData();
     );
   }
 
-  // Tu wstaw funkcję fetchStations(), którą wcześniej zdefiniowałeś
 }
 
