@@ -1,35 +1,37 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_rest_api/get_api.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 void main() => runApp(const MyApp());
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
-
   @override
-  _MyAppState createState() => _MyAppState();
+  MyAppState createState() => MyAppState();
 }
-
-class _MyAppState extends State<MyApp> {
+class MyAppState extends State<MyApp> {
   final Map<String, Marker> _markers = {};
+  
 
-  Future<void> _fetchAndSetMarkers() async {
-    final List<dynamic> stations = await fetchStations();
+Future<void> _fetchAndSetMarkers() async {
+
+final List<dynamic> stations = await fetchApiData();
     setState(() {
       _markers.clear();
       for (final station in stations) {
         final marker = Marker(
-          markerId: MarkerId(station['id'].toString()),
-          position: LatLng(double.parse(station['gegrLat']), double.parse(station['gegrLon'])),
+          markerId: MarkerId(station['school']['name'].toString()),
+          position: LatLng(
+            double.parse(station['school']['latitude']), 
+            double.parse(station['school']['longitude'])
+            ),
           infoWindow: InfoWindow(
-            title: station['stationName'],
-            snippet: 'ID: ${station['id']}',
+            title: station['school']['name'],
+            snippet: station['school']['street'],
           ),
         );
-        _markers[station['id'].toString()] = marker;
+    
+        _markers[station['school']['name']] = marker;
       }
     });
   }
