@@ -59,8 +59,10 @@ dev_dependencies:
 flutter:
   uses-material-design: true
   assets:
-    - assets/images/dot_64.png
-    - assets/images/green_dark_dot2_64.png
+    - assets/images/dot_green_48.png
+    - assets/images/dot_yellow_48.png
+    - assets/images/dot_orange_48.png
+    - assets/images/dot_red_48.png
 
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware

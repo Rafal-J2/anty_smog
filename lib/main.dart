@@ -13,12 +13,20 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   final Map<String, Marker> _markers = {};
   late BitmapDescriptor _markerIcon;
+  late BitmapDescriptor _markerIcon2;
+  late BitmapDescriptor _markerIcon3;
+  late BitmapDescriptor _markerIcon4;
 
-  void _addMarkerIcon() async {
-    _markerIcon = await BitmapDescriptor.fromAssetImage(
-      const ImageConfiguration(),
-      'assets/images/dot_64.png',
-    );
+  Future<BitmapDescriptor> _addMarkerIcon(String assetPath) async {
+    return await BitmapDescriptor.fromAssetImage(
+        const ImageConfiguration(), assetPath);
+  }
+
+  void _loadMarkerIcons() async {
+    _markerIcon = await _addMarkerIcon('assets/images/dot_green_48.png');
+    _markerIcon2 = await _addMarkerIcon('assets/images/dot_yellow_48.png');
+    _markerIcon3 = await _addMarkerIcon('assets/images/dot_orange_48.png');
+    _markerIcon4 = await _addMarkerIcon('assets/images/dot_red_48.png');
   }
 
   Future<void> _fetchAndSetMarkers() async {
@@ -31,10 +39,16 @@ class MyAppState extends State<MyApp> {
           position: LatLng(double.parse(station['school']['latitude']),
               double.parse(station['school']['longitude'])),
           infoWindow: InfoWindow(
-          title: station['school']['name'],
-          snippet: 'PM 2.5: ${(station['data']['pm25_avg'] as num).toInt()}\nPM 10: ${(station['data']['pm10_avg'] as num).toInt()}',
+            title: station['school']['name'],
+            snippet: 'PM 2.5: ${(station['data']['pm25_avg'] as num).toInt()}',
           ),
-          icon: _markerIcon,
+          icon: (station['data']['pm25_avg'] as num) > 55
+              ? _markerIcon4
+              : (station['data']['pm25_avg'] as num) > 35
+                  ? _markerIcon3
+                  : (station['data']['pm25_avg'] as num) > 15
+                      ? _markerIcon2
+                      : _markerIcon,
         );
 
         _markers[station['school']['name']] = marker;
@@ -46,7 +60,7 @@ class MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _fetchAndSetMarkers();
-    _addMarkerIcon();
+    _loadMarkerIcons();
   }
 
   @override
