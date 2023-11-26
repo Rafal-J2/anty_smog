@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_rest_api/api/get_api.dart';
-
-import 'bloc/app_block.dart';
+import 'package:google_maps_rest_api/get_api.dart';
 
 void main() => runApp(const MyApp());
 
@@ -14,7 +11,6 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-  
   final Map<String, Marker> _markers = {};
   late BitmapDescriptor _markerIcon;
   late BitmapDescriptor _markerIcon2;
@@ -73,16 +69,13 @@ class MyAppState extends State<MyApp> {
       theme: ThemeData(
         fontFamily: 'CustomFont',
       ),
-      home: BlocProvider(
-        create: (context) => SubjectBloc(),
-        child: GoogleMap(
-          onMapCreated: (GoogleMapController controller) {},
-          initialCameraPosition: const CameraPosition(
-            target: LatLng(52.237049, 21.017532),
-            zoom: 5,
-          ),
-          markers: _markers.values.toSet(),
+      home: GoogleMap(
+        onMapCreated: (GoogleMapController controller) {},
+        initialCameraPosition: const CameraPosition(
+          target: LatLng(52.237049, 21.017532),
+          zoom: 5,
         ),
+        markers: _markers.values.toSet(),
       ),
     );
   }

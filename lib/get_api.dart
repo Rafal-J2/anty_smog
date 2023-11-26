@@ -2,7 +2,6 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 
-class UserRepository {
 Future<List<dynamic>> fetchApiData() async {
   final response = await http.get(Uri.parse('https://public-esa.ose.gov.pl/api/v1/smog'));
   if (response.statusCode == 200) {
@@ -10,6 +9,4 @@ Future<List<dynamic>> fetchApiData() async {
   } else {
     throw Exception('Failed to load data');
   }
-}
-
 }
