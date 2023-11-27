@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_rest_api/maps/marker_icon_loader.dart';
 import 'package:google_maps_rest_api/get_api.dart';
+import 'maps/marker_helper.dart';
 
 void main() => runApp(const MyApp());
 
@@ -12,45 +14,15 @@ class MyApp extends StatefulWidget {
 
 class MyAppState extends State<MyApp> {
   final Map<String, Marker> _markers = {};
-  late BitmapDescriptor _markerIcon;
-  late BitmapDescriptor _markerIcon2;
-  late BitmapDescriptor _markerIcon3;
-  late BitmapDescriptor _markerIcon4;
-
-  Future<BitmapDescriptor> _addMarkerIcon(String assetPath) async {
-    return await BitmapDescriptor.fromAssetImage(
-        const ImageConfiguration(), assetPath);
-  }
-
-  void _loadMarkerIcons() async {
-    _markerIcon = await _addMarkerIcon('assets/images/dot_green_48.png');
-    _markerIcon2 = await _addMarkerIcon('assets/images/dot_yellow_48.png');
-    _markerIcon3 = await _addMarkerIcon('assets/images/dot_orange_48.png');
-    _markerIcon4 = await _addMarkerIcon('assets/images/dot_red_48.png');
-  }
+  final MarkerIconLoader _iconLoader = MarkerIconLoader();
+  late MarkerHelper _markerHelper;
 
   Future<void> _fetchAndSetMarkers() async {
     final List<dynamic> stations = await fetchApiData();
     setState(() {
       _markers.clear();
       for (final station in stations) {
-        final marker = Marker(
-          markerId: MarkerId(station['school']['name'].toString()),
-          position: LatLng(double.parse(station['school']['latitude']),
-              double.parse(station['school']['longitude'])),
-          infoWindow: InfoWindow(
-            title: station['school']['name'],
-            snippet: 'PM 2.5: ${(station['data']['pm25_avg'] as num).toInt()}',
-          ),
-          icon: (station['data']['pm25_avg'] as num) > 55
-              ? _markerIcon4
-              : (station['data']['pm25_avg'] as num) > 35
-                  ? _markerIcon3
-                  : (station['data']['pm25_avg'] as num) > 15
-                      ? _markerIcon2
-                      : _markerIcon,
-        );
-
+        final marker = _markerHelper.buildMarker(station);
         _markers[station['school']['name']] = marker;
       }
     });
@@ -60,7 +32,8 @@ class MyAppState extends State<MyApp> {
   void initState() {
     super.initState();
     _fetchAndSetMarkers();
-    _loadMarkerIcons();
+    _iconLoader.loadMarkerIcons();
+    _markerHelper = MarkerHelper(_iconLoader);
   }
 
   @override
