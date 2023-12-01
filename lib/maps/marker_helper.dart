@@ -24,7 +24,7 @@ class MarkerHelper {
     icon: 
         pm25Avg > 55 ? _iconLoader.markerIcon4
       : pm25Avg > 35 ? _iconLoader.markerIcon3
-      : pm25Avg > 15 ? _iconLoader.markerIcon2
+      : pm25Avg > 13 ? _iconLoader.markerIcon2
       : _iconLoader.markerIcon,
     );
   }

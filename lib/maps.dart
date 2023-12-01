@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'marker_cubit.dart';
+import 'block/location_gps.dart';
+import 'block/marker_cubit.dart';
 
 void main() {
   runApp(
@@ -20,9 +21,7 @@ class MyApp extends StatefulWidget {
 }
 
 class MyAppState extends State<MyApp> {
-late GoogleMapController _controller;
-
-
+  late GoogleMapController _controller;
 
   Future<Position> _getCurrentLocation() async {
     bool serviceEnabled;
@@ -49,29 +48,31 @@ late GoogleMapController _controller;
     }
     // Location services are enabled, and we have permission to use location.
     return await Geolocator.getCurrentPosition(
-      desiredAccuracy: LocationAccuracy.high,
+      desiredAccuracy: LocationAccuracy.low,
     );
   }
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
-        home: Scaffold(
-      body: BlocBuilder<MarkerCubit, Map<String, Marker>>(
-        builder: (context, state) {
-          return GoogleMap(
-            onMapCreated: (GoogleMapController controller) async {
-              _controller = controller;
-            },
-            initialCameraPosition: const CameraPosition(
-              target: LatLng(52.237049, 21.017532),
-              zoom: 6,
-            ),
-            markers: state.values.toSet(),
-          );
-        },
-      ),
-       floatingActionButton: FloatingActionButton(
+    return BlocProvider(
+      create: (context) => LocationGps(),
+      child: MaterialApp(
+          home: Scaffold(
+        body: BlocBuilder<MarkerCubit, Map<String, Marker>>(
+          builder: (context, state) {
+            return GoogleMap(
+              onMapCreated: (GoogleMapController controller) async {
+                _controller = controller;
+              },
+              initialCameraPosition: const CameraPosition(
+                target: LatLng(52.237049, 21.017532),
+                zoom: 5,
+              ),
+              markers: state.values.toSet(),
+            );
+          },
+        ),
+        floatingActionButton: FloatingActionButton(
           onPressed: () async {
             try {
               Position position = await _getCurrentLocation();
@@ -93,6 +94,7 @@ late GoogleMapController _controller;
           },
           child: const Icon(Icons.my_location),
         ),
-    ));
+      )),
+    );
   }
 }
