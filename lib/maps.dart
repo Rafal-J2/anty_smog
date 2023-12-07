@@ -5,7 +5,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'block/location_gps.dart';
 import 'block/marker_cubit.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
+import 'preferences_service.dart';
 
 class MyApp extends StatefulWidget {
   const MyApp({super.key});
@@ -16,7 +16,16 @@ class MyApp extends StatefulWidget {
 class MyAppState extends State<MyApp> {
   late GoogleMapController _controller;
 
-  
+  Future<void> _printSavedCameraPosition() async {
+    final prefs = await SharedPreferences.getInstance();
+    double? latitude = prefs.getDouble('latitude');
+    double? longitude = prefs.getDouble('longitude');
+    double? zoom = prefs.getDouble('zoom');
+
+    print('Saved latitude: $latitude');
+    print('Saved longitude: $longitude');
+    print('Saved zoom: $zoom');
+  }
 
   void _initCameraPosition() async {
     final prefs = await SharedPreferences.getInstance();
@@ -48,17 +57,6 @@ class MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      theme: ThemeData(
-        fontFamily: 'CustomFont'),
-       localizationsDelegates: const [
-        GlobalMaterialLocalizations.delegate,
-        GlobalWidgetsLocalizations.delegate,
-        GlobalCupertinoLocalizations.delegate,
-      ],
-         supportedLocales: const [
-        Locale('pl', ''), // Polish
-        // other locales...
-      ],
         home: Scaffold(
       body: BlocBuilder<MarkerCubit, Map<String, Marker>>(
         builder: (context, state) {
@@ -67,13 +65,11 @@ class MyAppState extends State<MyApp> {
             zoomControlsEnabled: false,
             onMapCreated: (GoogleMapController controller) async {
               _controller = controller;
-              _initCameraPosition();
+              _printSavedCameraPosition();
+              _initCameraPosition();       
             },
-            onCameraMove: (CameraPosition position) async {
-              final prefs = await SharedPreferences.getInstance();
-              await prefs.setDouble('latitude', position.target.latitude);
-              await prefs.setDouble('longitude', position.target.longitude);
-              await prefs.setDouble('zoom', position.zoom);
+            onCameraMove: (CameraPosition position) {
+              PreferencesService().saveCameraPosition(position);
             },
             initialCameraPosition: const CameraPosition(
               target: LatLng(52.237049, 21.017532),
