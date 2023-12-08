@@ -31,7 +31,7 @@ dependencies:
   flutter:
     sdk: flutter
   google_maps_flutter: ^2.5.0
-  logger: ^1.4.0
+  logger: ^2.0.2+1
   http: ^1.1.0
   json_annotation: ^4.8.1
   flutter_bloc: ^8.1.3

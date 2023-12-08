@@ -3,7 +3,6 @@ import 'package:dio/dio.dart';
 Future<List<dynamic>> fetchApiData() async {
   var dio = Dio();
   final response = await dio.get('https://public-esa.ose.gov.pl/api/v1/smog');
-  print('Content-Type: ${response.headers.value('content-type')}');
   if (response.statusCode == 200) {
     return response.data['smog_data'];
   } else {
