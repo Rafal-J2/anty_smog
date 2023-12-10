@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_rest_api/get_api.dart';
-import 'package:google_maps_rest_api/maps/marker_helper.dart';
-import 'package:google_maps_rest_api/maps/marker_icon_loader.dart';
+import 'package:google_maps_rest_api/marker/marker_helper.dart';
+import 'package:google_maps_rest_api/marker/marker_icon_loader.dart';
 
 
 class MarkerCubit extends Cubit<Map<String, Marker>> {
@@ -18,7 +18,7 @@ class MarkerCubit extends Cubit<Map<String, Marker>> {
     final List<dynamic> stations = await fetchApiData();
     final Map<String, Marker> newMarkers = {};
     for (final station in stations) {
-      final marker = _markerHelper.buildMarker(station);
+        final marker = _markerHelper.buildMarker(station, () {});
       newMarkers[station['school']['name']] = marker;
     }
     emit(newMarkers);

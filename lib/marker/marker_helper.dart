@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'marker_icon_loader.dart';
 
@@ -11,7 +12,7 @@ class MarkerHelper {
 // The 'school' key should map to another Map containing 'name', 'latitude', and 'longitude' keys.
 // The 'data' key should map to another Map containing 'pm25_avg' key.
 // It returns a Marker object.
-  Marker buildMarker(Map<String, dynamic> station) {
+  Marker buildMarker(Map<String, dynamic> station, VoidCallback onTap) {
     num pm25Avg = station['data']['pm25_avg'] as num;
     return Marker(
       markerId: MarkerId(station['school']['name'].toString()),
