@@ -1,7 +1,8 @@
-import 'package:flutter/foundation.dart';
+//import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'marker_icon_loader.dart';
+
 
 class MarkerHelper {
   final MarkerIconLoader _iconLoader;
@@ -22,13 +23,15 @@ class MarkerHelper {
       infoWindow: InfoWindow(
         title: station['school']['name'],
         snippet: 'PM 2.5: ${(station['data']['pm25_avg'] as num).toInt()}',
-      ),    
-     
-    icon: 
-        pm25Avg > 55 ? _iconLoader.markerIcon4
-      : pm25Avg > 35 ? _iconLoader.markerIcon3
-      : pm25Avg > 13 ? _iconLoader.markerIcon2
-      : _iconLoader.markerIcon,
+      ),
+      icon: pm25Avg > 55
+          ? _iconLoader.markerIcon4
+          : pm25Avg > 35
+          ? _iconLoader.markerIcon3
+          : pm25Avg > 13
+          ? _iconLoader.markerIcon2
+          : _iconLoader.markerIcon,
     );
   }
+  
 }

@@ -17,13 +17,13 @@ class MyApp extends StatefulWidget {
 }
 
 var logger = Logger();
-  
 
 class MyAppState extends State<MyApp> {
   late GoogleMapController _controller;
   MapType _currentMapType = MapType.normal;
 
-
+  double _todayValue = 250;
+ bool _isMarkerVisible = false;
 
   void _onMapTypeButtonPressed() {
     setState(() {
@@ -32,6 +32,13 @@ class MyAppState extends State<MyApp> {
           : MapType.normal;
     });
   }
+
+  //    void _toggleVisibility() {
+  //   setState(() {
+  //    _isMarkerVisible = !_isMarkerVisible;
+  //   });
+  // }
+
 
   Future<void> _printSavedCameraPosition() async {
     final prefs = await SharedPreferences.getInstance();
@@ -48,8 +55,10 @@ class MyAppState extends State<MyApp> {
     _controller.animateCamera(CameraUpdate.newCameraPosition(position));
   }
 
-  double _todayValue = 250;
-  bool _isMarkerVisible = false;
+ 
+
+
+  
 
   @override
   Widget build(BuildContext context) {
@@ -64,8 +73,7 @@ class MyAppState extends State<MyApp> {
                   GoogleMap(
                     onTap: (LatLng position) {
                       setState(() {
-                        // Toggle the visibility
-                        _isMarkerVisible = false;
+                        _isMarkerVisible = true;                   
                       });
                     },
                     mapType: _currentMapType,
@@ -85,31 +93,31 @@ class MyAppState extends State<MyApp> {
                     ),
                     markers: state.values.toSet(),
                   ),
-                   if (_isMarkerVisible)
-                  Positioned(
-                    bottom: 20,
-                    left: 20,
-                    child: Container(
-                      width: 500,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(8.0),
-                        child:
-                            buildSleepQualityGauge(), // Call the chart widget here
+                  if (_isMarkerVisible)
+                    Positioned(
+                      bottom: 20,
+                      left: 20,
+                      child: Container(
+                        width: 500,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child:
+                              buildSleepQualityGauge(), // Call the chart widget here
+                        ),
                       ),
                     ),
-                  ),
                   Positioned(
                     bottom: 240,
                     right: 10,
