@@ -1,26 +1,67 @@
-//import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
 import 'marker_icon_loader.dart';
 
+class MarkerHelper {
+  final MarkerIconLoader _iconLoader;
+  MarkerHelper(this._iconLoader);
+
+// This method builds a marker for a given station.
+// It takes a Map representing a station as a parameter.
+// The station Map should contain 'school' and 'data' keys.
+// The 'school' key should map to another Map containing 'name', 'latitude', and 'longitude' keys.
+// The 'data' key should map to another Map containing 'pm25_avg' key.
+// It returns a Marker object.
+  Marker buildMarker(Map<String, dynamic> station, VoidCallback onTap) {
+    num pm25Avg = station['data']['pm25_avg'] as num;
+
+    print("PM 2.5 Avg: $pm25Avg");
+
+    return Marker(
+      markerId: MarkerId(station['school']['name'].toString()),
+      position: LatLng(double.parse(station['school']['latitude']),
+          double.parse(station['school']['longitude'])),
+      infoWindow: InfoWindow(
+        title: station['school']['name'],
+        snippet: 'PM 2.5: ${pm25Avg.toInt()}',
+      ),
+      icon: pm25Avg > 55
+          ? _iconLoader.markerIcon4
+          : pm25Avg > 35
+              ? _iconLoader.markerIcon3
+              : pm25Avg > 13
+                  ? _iconLoader.markerIcon2
+                  : _iconLoader.markerIcon,
+    );
+  }
+}
+
 class MarkerHelperUdate extends StatefulWidget {
- 
-  const MarkerHelperUdate({super.key});
+  final double pm25Avg;
+  const MarkerHelperUdate({super.key, required this.pm25Avg});
 
   @override
   State<MarkerHelperUdate> createState() => _MarkerHelperUdateState();
 }
-class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
-  double _todayValue = 250;
 
-    @override
+class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
+//  double _todayValue = 250;
+  late double _todayValue;
+
+  @override
+  void initState() {
+    super.initState();
+    _todayValue = widget.pm25Avg; // Use the pm25Avg passed to the widget
+  }
+
+  @override
   Widget build(BuildContext context) {
     return buildSleepQualityGauge();
   }
 
   Widget buildSleepQualityGauge() {
-   final Brightness brightness = Theme.of(context).brightness;
+    final Brightness brightness = Theme.of(context).brightness;
     return Column(
       children: [
         Row(
@@ -311,37 +352,6 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
           ],
         ),
       ],
-    );
-  }
-}
-
-class MarkerHelper {
-  final MarkerIconLoader _iconLoader;
-  MarkerHelper(this._iconLoader);
-
-// This method builds a marker for a given station.
-// It takes a Map representing a station as a parameter.
-// The station Map should contain 'school' and 'data' keys.
-// The 'school' key should map to another Map containing 'name', 'latitude', and 'longitude' keys.
-// The 'data' key should map to another Map containing 'pm25_avg' key.
-// It returns a Marker object.
-  Marker buildMarker(Map<String, dynamic> station, VoidCallback onTap) {
-    num pm25Avg = station['data']['pm25_avg'] as num;
-    return Marker(
-      markerId: MarkerId(station['school']['name'].toString()),
-      position: LatLng(double.parse(station['school']['latitude']),
-          double.parse(station['school']['longitude'])),
-      infoWindow: InfoWindow(
-        title: station['school']['name'],
-        snippet: 'PM 2.5: ${(station['data']['pm25_avg'] as num).toInt()}',
-      ),
-      icon: pm25Avg > 55
-          ? _iconLoader.markerIcon4
-          : pm25Avg > 35
-              ? _iconLoader.markerIcon3
-              : pm25Avg > 13
-                  ? _iconLoader.markerIcon2
-                  : _iconLoader.markerIcon,
     );
   }
 }

@@ -104,7 +104,7 @@ class MyAppState extends State<MyApp> {
                         ),
                         child: const Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: MarkerHelperUdate(),
+                          child: MarkerHelperUdate(pm25Avg: 100,),
                         ),
                       ),
                     ),
