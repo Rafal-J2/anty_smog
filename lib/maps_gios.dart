@@ -1,13 +1,23 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'block/pm_marker_cubit.dart';
 import 'get_api.dart';
 
 class MyApp2 extends StatefulWidget {
   const MyApp2({super.key});
 
+  
+
   @override
   State<MyApp2> createState() => _MyAppState();
 }
+
+Map<MarkerId, int> markerToCityIdMap = {
+  const MarkerId('marker_id1'): 1,
+  const MarkerId('marker_id2'): 2,
+  // ... inne mapowania markerów na identyfikatory miast
+};
 
 class _MyAppState extends State<MyApp2> {
   final Map<String, Marker> _markers = {};
@@ -18,46 +28,49 @@ class _MyAppState extends State<MyApp2> {
     _fetchAndSetMarkers();
   }
 
-Future<void> _fetchAndSetMarkers() async {
-  final List<dynamic> stations = await fetchStations();
-  setState(() {
-    _markers.clear();
-    for (var station in stations) {
-      fetchStationSensors(station['id']).then((sensors) {
-        var pm10Sensor = sensors.firstWhere(
-          (sensor) => sensor['param']['paramCode'] == 'PM10',
-          orElse: () => null,
-        );
-        if (pm10Sensor != null) {
-          fetchSensorData(pm10Sensor['id']).then((data) {
-            // Przykład zakłada, że interesuje nas najnowsza wartość PM10.
-            var pm10Value = data['values'].firstWhere(
-              (v) => v['value'] != null,
-              orElse: () => {'value': 'Brak danych'},
-            )['value'];
+  Future<void> _fetchAndSetMarkers() async {
+    final List<dynamic> stations = await fetchStations();
+    setState(() {
+      _markers.clear();
+      for (var station in stations) {
+        fetchStationSensors(station['id']).then((sensors) {
+          var pm10Sensor = sensors.firstWhere(
+            (sensor) => sensor['param']['paramCode'] == 'PM10',
+            orElse: () => null,
+          );
+          if (pm10Sensor != null) {
+            fetchSensorData(pm10Sensor['id']).then((data) {
+              // Przykład zakłada, że interesuje nas najnowsza wartość PM10.
+              var pm10Value = data['values'].firstWhere(
+                (v) => v['value'] != null,
+                orElse: () => {'value': 'Brak danych'},
+              )['value'];
 
-            final marker = Marker(
-              markerId: MarkerId(station['id'].toString()),
-              position: LatLng(
-                double.tryParse(station['gegrLat']) ?? 0.0,
-                double.tryParse(station['gegrLon']) ?? 0.0,
-              ),
-              infoWindow: InfoWindow(
-                title: station['stationName'] ?? 'Unknown',
-                snippet: 'PM10: $pm10Value',
-              ),
-            );
-
-            setState(() {
-              _markers[station['id'].toString()] = marker;
+              final marker = Marker(
+                markerId: MarkerId(station['id'].toString()),
+                position: LatLng(
+                  double.tryParse(station['gegrLat']) ?? 0.0,
+                  double.tryParse(station['gegrLon']) ?? 0.0,
+                ),
+                infoWindow: InfoWindow(
+                  title: station['stationName'] ?? 'Unknown',
+                  snippet: 'PM10: $pm10Value',
+                ),
+                onTap: () {
+                  // Używaj nawiasów klamrowych dla wielu instrukcji
+                  int? cityId = markerToCityIdMap[const MarkerId('marker_id')];
+                  context.read<GiosDataCubit>().fetchStations(cityId!);
+                },
+              );
+              setState(() {
+                _markers[station['id'].toString()] = marker;
+              });
             });
-          });
-        }
-      });
-    }
-  });
-}
-
+          }
+        });
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
