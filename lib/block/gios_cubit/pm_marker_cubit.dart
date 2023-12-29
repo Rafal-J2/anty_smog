@@ -20,7 +20,7 @@ class GiosDataCubit extends Cubit<GiosDataState> {
         emit(GiosDataError("Failed to load data")); // Emituj stan błędu
       }
     } catch (e) {
-      if(e is DioError){
+      if(e is DioException){
         emit(GiosDataError("Failed to load data: ${e.message}")); // Emituj stan błędu z komunikatem DioError
       }else{
         emit(GiosDataError("An unexpected error occurred")); // Emituj stan błędu dla innego wyjątku

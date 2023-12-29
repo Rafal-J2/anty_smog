@@ -1,8 +1,8 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_rest_api/get_api.dart';
-import 'package:google_maps_rest_api/marker/marker_helper.dart';
-import 'package:google_maps_rest_api/marker/marker_icon_loader.dart';
+import 'package:google_maps_rest_api/services/get_api.dart';
+import 'package:google_maps_rest_api/utils/marker_helper.dart';
+import 'package:google_maps_rest_api/utils/marker_icon_loader.dart';
 
 
 class MarkerCubit extends Cubit<Map<String, Marker>> {

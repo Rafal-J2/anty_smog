@@ -16,8 +16,6 @@ class MarkerHelper {
   Marker buildMarker(Map<String, dynamic> station, VoidCallback onTap) {
     num pm25Avg = station['data']['pm25_avg'] as num;
 
-    print("PM 2.5 Avg: $pm25Avg");
-
     return Marker(
       markerId: MarkerId(station['school']['name'].toString()),
       position: LatLng(double.parse(station['school']['latitude']),

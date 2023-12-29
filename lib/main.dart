@@ -1,9 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'block/location_gps.dart';
-import 'maps.dart';
-import 'block/marker_cubit.dart';
-import 'maps_gios.dart';
+import '../block/location_gps.dart';
+import 'screens/maps.dart';
+import '../block/marker_cubit.dart';
 
 void main() {
   runApp(
@@ -16,7 +15,7 @@ void main() {
           create: (context) => LocationGps()..getCurrentLocation(),
         ),
       ],
-      child: const MyApp2(),
+      child: const AntySmogApp(),
     ),
   );
 }

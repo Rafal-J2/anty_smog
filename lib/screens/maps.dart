@@ -4,29 +4,29 @@ import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-import 'block/location_gps.dart';
-import 'block/marker_cubit.dart';
-import 'marker/marker_helper.dart';
-import 'shared preferences/map_service.dart';
-import 'shared preferences/preferences_service.dart';
+import '../block/location_gps.dart';
+import '../block/marker_cubit.dart';
+import '../utils/marker_helper.dart';
+import '../shared/map_service.dart';
+import '../shared/preferences_service.dart';
 import 'package:logger/logger.dart';
 
-class MyApp extends StatefulWidget {
-  const MyApp({super.key});
+class AntySmogApp extends StatefulWidget {
+  const AntySmogApp({super.key});
   @override
-  MyAppState createState() => MyAppState();
+  AntySmogAppState createState() => AntySmogAppState();
 }
 
 var logger = Logger();
 
-class MyAppState extends State<MyApp> {
+class AntySmogAppState extends State<AntySmogApp> {
   late GoogleMapController _controller;
   MapType _currentMapType = MapType.normal;
 
 //double _todayValue = 250;
- bool _isMarkerVisible = false;
+  bool _isMarkerVisible = false;
 
- //final markerHelper = const MarkerHelperUdate();
+  //final markerHelper = const MarkerHelperUdate();
 
   void _onMapTypeButtonPressed() {
     setState(() {
@@ -35,6 +35,7 @@ class MyAppState extends State<MyApp> {
           : MapType.normal;
     });
   }
+
   Future<void> _printSavedCameraPosition() async {
     final prefs = await SharedPreferences.getInstance();
     double? latitude = prefs.getDouble('latitude');
@@ -50,7 +51,6 @@ class MyAppState extends State<MyApp> {
     _controller.animateCamera(CameraUpdate.newCameraPosition(position));
   }
 
-
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -64,7 +64,7 @@ class MyAppState extends State<MyApp> {
                   GoogleMap(
                     onTap: (LatLng position) {
                       setState(() {
-                        _isMarkerVisible = true;                   
+                        _isMarkerVisible = true;
                       });
                     },
                     mapType: _currentMapType,
@@ -104,7 +104,9 @@ class MyAppState extends State<MyApp> {
                         ),
                         child: const Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: MarkerHelperUdate(pm25Avg: 100,),
+                          child: MarkerHelperUdate(
+                            pm25Avg: 100,
+                          ),
                         ),
                       ),
                     ),

@@ -1,16 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'block/pm_marker_cubit.dart';
-import 'get_api.dart';
+import 'block/gios_cubit/pm_marker_cubit.dart';
+import 'services/get_api.dart';
 
-class MyApp2 extends StatefulWidget {
-  const MyApp2({super.key});
+class AntySmogGiosApp extends StatefulWidget {
+  const AntySmogGiosApp({super.key});
 
   
 
   @override
-  State<MyApp2> createState() => _MyAppState();
+  State<AntySmogGiosApp> createState() => _MyAppState();
 }
 
 Map<MarkerId, int> markerToCityIdMap = {
@@ -19,7 +19,7 @@ Map<MarkerId, int> markerToCityIdMap = {
   // ... inne mapowania markerów na identyfikatory miast
 };
 
-class _MyAppState extends State<MyApp2> {
+class _MyAppState extends State<AntySmogGiosApp> {
   final Map<String, Marker> _markers = {};
   late GoogleMapController mapController; // Controller for Google map
 
@@ -91,8 +91,4 @@ class _MyAppState extends State<MyApp2> {
       ),
     );
   }
-}
-
-void main() {
-  runApp(const MyApp2());
 }
