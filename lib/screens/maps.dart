@@ -3,13 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-
 import '../block/location_gps.dart';
 import '../block/marker_cubit.dart';
-import '../utils/marker_helper.dart';
 import '../shared/map_service.dart';
 import '../shared/preferences_service.dart';
 import 'package:logger/logger.dart';
+
+import 'chart_panel.dart';
 
 class AntySmogApp extends StatefulWidget {
   const AntySmogApp({super.key});
@@ -104,9 +104,7 @@ class AntySmogAppState extends State<AntySmogApp> {
                         ),
                         child: const Padding(
                           padding: EdgeInsets.all(8.0),
-                          child: MarkerHelperUdate(
-                            pm25Avg: 100,
-                          ),
+                          child: MarkerHelperUdate(),
                         ),
                       ),
                     ),

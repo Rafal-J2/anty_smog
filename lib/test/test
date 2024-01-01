@@ -1,0 +1,9 @@
+@override
+Widget build(BuildContext context) {
+  // Przykład użycia _markerHelper do uzyskania znaczników
+  var markers = _markerHelper.getMarkers();  // Załóżmy, że taka metoda istnieje
+  return GoogleMap(
+    markers: markers,
+    // ... inne właściwości mapy ...
+  );
+}
