@@ -59,68 +59,63 @@ class AntySmogAppState extends State<AntySmogApp> {
         builder: (context, state) {
           return Stack(
             children: [
-              Stack(
-                children: [
-                  GoogleMap(
-                    onTap: (LatLng position) {
-                      setState(() {
-                        _isMarkerVisible = true;
-                      });
-                    },
-                    mapType: _currentMapType,
-                    myLocationButtonEnabled: false,
-                    zoomControlsEnabled: false,
-                    onMapCreated: (GoogleMapController controller) async {
-                      _controller = controller;
-                      _printSavedCameraPosition();
-                      _initCameraPosition();
-                    },
-                    onCameraMove: (CameraPosition position) {
-                      PreferencesService().saveCameraPosition(position);
-                    },
-                    initialCameraPosition: const CameraPosition(
-                      target: LatLng(52.237049, 21.017532),
-                      zoom: 6,
-                    ),
-                    markers: state.values.toSet(),
-                  ),
-                  if (_isMarkerVisible)
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      child: Container(
-                        width: 500,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: MarkerHelperUdate(),
-                        ),
-                      ),
-                    ),
-                  Positioned(
-                    bottom: 240,
-                    right: 10,
-                    child: FloatingActionButton(
-                      onPressed: _onMapTypeButtonPressed,
-                      child: _currentMapType == MapType.normal
-                          ? const Icon(Icons.map)
-                          : const Icon(Icons.satellite),
-                    ),
-                  ),
-                ],
+              GoogleMap(
+                onTap: (LatLng position) {
+                  setState(() {
+                    _isMarkerVisible = true;
+                  });
+                },
+                mapType: _currentMapType,
+                myLocationButtonEnabled: false,
+                zoomControlsEnabled: false,
+                onMapCreated: (GoogleMapController controller) async {
+                  _controller = controller;
+                  _printSavedCameraPosition();
+                  _initCameraPosition();
+                },
+                onCameraMove: (CameraPosition position) {
+                  PreferencesService().saveCameraPosition(position);
+                },
+                initialCameraPosition: const CameraPosition(
+                  target: LatLng(52.237049, 21.017532),
+                  zoom: 6,
+                ),
+                markers: state.values.toSet(),
               ),
-              // other widgets...
+              if (_isMarkerVisible)
+                Positioned(
+                  bottom: 20,
+                  left: 20,
+                  child: Container(
+                    width: 500,
+                    height: 150,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(12),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.2),
+                          blurRadius: 6,
+                          offset: const Offset(0, 2),
+                        ),
+                      ],
+                    ),
+                    child: const Padding(
+                      padding: EdgeInsets.all(8.0),
+                      child: MarkerHelperUdate(),
+                    ),
+                  ),
+                ),
+              Positioned(
+                bottom: 240,
+                right: 10,
+                child: FloatingActionButton(
+                  onPressed: _onMapTypeButtonPressed,
+                  child: _currentMapType == MapType.normal
+                      ? const Icon(Icons.map)
+                      : const Icon(Icons.satellite),
+                ),
+              ),
             ],
           );
         },
