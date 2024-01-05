@@ -15,7 +15,7 @@ class MapService {
       );
     } else {
       return const CameraPosition(
-        target: LatLng(52.237049, 21.017532), // default location
+        target: LatLng(52.237049, 21.017532), 
         zoom: 6,
       );
     }

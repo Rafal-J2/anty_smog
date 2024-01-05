@@ -1,17 +1,16 @@
-// gios_data_state.dart
 
 abstract class GiosDataState {}
 
-class GiosDataInitial extends GiosDataState {} // Stan początkowy
+class GiosDataInitial extends GiosDataState {} 
 
-class GiosDataLoading extends GiosDataState {} // Stan ładowania danych
+class GiosDataLoading extends GiosDataState {} 
 
 class GiosDataLoaded extends GiosDataState {
-  final List<dynamic> data; // Załóżmy, że dane są listą dynamiczną
+  final List<dynamic> data; 
   GiosDataLoaded(this.data);
-} // Stan z załadowanymi danymi
+} 
 
 class GiosDataError extends GiosDataState {
-  final String message; // Wiadomość błędu
+  final String message;
   GiosDataError(this.message);
-} // Stan błędu
+} 

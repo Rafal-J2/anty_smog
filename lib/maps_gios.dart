@@ -16,12 +16,15 @@ class AntySmogGiosApp extends StatefulWidget {
 Map<MarkerId, int> markerToCityIdMap = {
   const MarkerId('marker_id1'): 1,
   const MarkerId('marker_id2'): 2,
-  // ... inne mapowania markerów na identyfikatory miast
 };
 
 class _MyAppState extends State<AntySmogGiosApp> {
   final Map<String, Marker> _markers = {};
-  late GoogleMapController mapController; // Controller for Google map
+  late GoogleMapController mapController; 
+
+///
+
+///
 
   void _onMapCreated(GoogleMapController controller) {
     mapController = controller;
@@ -57,7 +60,6 @@ class _MyAppState extends State<AntySmogGiosApp> {
                   snippet: 'PM10: $pm10Value',
                 ),
                 onTap: () {
-                  // Używaj nawiasów klamrowych dla wielu instrukcji
                   int? cityId = markerToCityIdMap[const MarkerId('marker_id')];
                   context.read<GiosDataCubit>().fetchStations(cityId!);
                 },
@@ -83,7 +85,7 @@ class _MyAppState extends State<AntySmogGiosApp> {
         body: GoogleMap(
           onMapCreated: _onMapCreated,
           initialCameraPosition: const CameraPosition(
-            target: LatLng(52.237049, 21.017532), // Central point in Poland
+            target: LatLng(52.237049, 21.017532),
             zoom: 5,
           ),
           markers: _markers.values.toSet(),

@@ -26,7 +26,7 @@ class MarkerHelper {
         snippet: 'PM 2.5: ${pm25Avg.toInt()}',
       ),
       onTap: () {
-        pmDataCubit.updateData(pm25Avg.toDouble());  // Aktualizacja Cubit
+        pmDataCubit.updateData(pm25Avg.toDouble()); 
       },
       icon: pm25Avg > 55
           ? _iconLoader.markerIcon4

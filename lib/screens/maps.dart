@@ -8,7 +8,6 @@ import '../block/marker_cubit.dart';
 import '../shared/map_service.dart';
 import '../shared/preferences_service.dart';
 import 'package:logger/logger.dart';
-
 import 'chart_panel.dart';
 
 class AntySmogApp extends StatefulWidget {
@@ -19,15 +18,18 @@ class AntySmogApp extends StatefulWidget {
 
 var logger = Logger();
 
+/// Class representing the state of the AntySmogApp.
+/// It includes methods for initializing the camera position, updating map type,
+/// and building the main application widget.
 class AntySmogAppState extends State<AntySmogApp> {
+
   late GoogleMapController _controller;
   MapType _currentMapType = MapType.normal;
+  bool _activateChartsPanel = false;
 
-//double _todayValue = 250;
-  bool _isMarkerVisible = false;
 
-  //final markerHelper = const MarkerHelperUdate();
-
+/// Toggles the map type between normal (street view) and satellite when the map type button is pressed.
+/// This allows users to switch between different views of the map according to their preferences..
   void _onMapTypeButtonPressed() {
     setState(() {
       _currentMapType = _currentMapType == MapType.normal
@@ -46,11 +48,26 @@ class AntySmogAppState extends State<AntySmogApp> {
     logger.i('Saved zoom: $zoom');
   }
 
-  void _initCameraPosition() async {
+/// Initializes the camera position to the last known user position.
+/// It retrieves the last known latitude, longitude, and zoom level from SharedPreferences,
+/// which are saved whenever the user checks the air quality.
+  void _initialCameraPosition() async {
     CameraPosition position = await MapService().initCameraPosition();
     _controller.animateCamera(CameraUpdate.newCameraPosition(position));
   }
 
+/// Builds the main application widget.
+///
+/// This widget is the root of the application and contains a [GoogleMap] widget
+/// that displays dynamic markers. It uses [BlocBuilder] to listen for changes
+/// in [MarkerCubit], which manages the state of the markers based on geographical data.
+///
+/// The map displays markers for each station, which are provided by the state of
+/// [MarkerCubit] as a set of markers (`state.values.toSet()`).
+/// 
+///  A GoogleMap widget that displays markers and allows interaction.
+/// - `onTap`: Defines behavior when the map is tapped. Currently, it sets '_isMarkerVisible' to true,
+///   which triggers the display of a panel with charts related to the tapped location.
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
@@ -62,7 +79,7 @@ class AntySmogAppState extends State<AntySmogApp> {
               GoogleMap(
                 onTap: (LatLng position) {
                   setState(() {
-                    _isMarkerVisible = true;
+                    _activateChartsPanel = true; // The operation of the function is described above in the documentation
                   });
                 },
                 mapType: _currentMapType,
@@ -71,7 +88,7 @@ class AntySmogAppState extends State<AntySmogApp> {
                 onMapCreated: (GoogleMapController controller) async {
                   _controller = controller;
                   _printSavedCameraPosition();
-                  _initCameraPosition();
+                  _initialCameraPosition();
                 },
                 onCameraMove: (CameraPosition position) {
                   PreferencesService().saveCameraPosition(position);
@@ -80,9 +97,9 @@ class AntySmogAppState extends State<AntySmogApp> {
                   target: LatLng(52.237049, 21.017532),
                   zoom: 6,
                 ),
-                markers: state.values.toSet(),
+                markers: state.values.toSet(),  // The operation of the function is described above in the documentation
               ),
-              if (_isMarkerVisible)
+              if (_activateChartsPanel) 
                 Positioned(
                   bottom: 20,
                   left: 20,
@@ -120,6 +137,9 @@ class AntySmogAppState extends State<AntySmogApp> {
           );
         },
       ),
+
+///  LocationGps Cubit, and how it updates the user's current location on the map.
+///  Floating Action Button: A widget that triggers fetching the user's current location.
       floatingActionButton: BlocConsumer<LocationGps, Position?>(
         listener: (context, position) {},
         builder: (context, position) {
@@ -145,3 +165,5 @@ class AntySmogAppState extends State<AntySmogApp> {
     ));
   }
 }
+
+

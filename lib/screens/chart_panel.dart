@@ -1,53 +1,52 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-
 import '../block/cubit/pm_data_cubit.dart';
 
 class MarkerHelperUdate extends StatefulWidget {
-  const MarkerHelperUdate({super.key, });
+  const MarkerHelperUdate({
+    super.key,
+  });
   @override
   State<MarkerHelperUdate> createState() => _MarkerHelperUdateState();
 }
 
 class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
- double _todayValue = 50;
-  
+  double _pm25Value = 50;
+  double _pm10Value = 50;
 
-  
+
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<PMDataCubit, PMDataState>( 
+    return BlocBuilder<PMDataCubit, PMDataState>(
       builder: (context, state) {
-        _todayValue = state.pm25Value;
+        _pm25Value = state.pm25Value;
         return buildQualityGauge();
       },
     );
   }
 
-
   Widget buildQualityGauge() {
     final Brightness brightness = Theme.of(context).brightness;
     return Column(
       children: [
-      Row(
+        Row(
           children: [
             Column(
-              //   crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const Text(
                   'TODAY 2',
                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  _todayValue.toStringAsFixed(0),
+                  _pm25Value.toStringAsFixed(0),
                   style: TextStyle(
                       fontSize: 26,
-                      color: _todayValue < 13
+                      color: _pm25Value < 13
                           ? Colors.green
-                          : _todayValue < 35
+                          : _pm25Value < 35
                               ? Colors.amber
-                              : _todayValue < 55
+                              : _pm25Value < 55
                                   ? const Color(0xffFB7D55)
                                   : Colors.red,
                       fontWeight: FontWeight.bold),
@@ -72,19 +71,19 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
                   ),
                   markerPointers: <LinearMarkerPointer>[
                     LinearShapePointer(
-                        value: _todayValue,
+                        value: _pm25Value,
                         onChanged: (dynamic value) {
                           setState(() {
-                            _todayValue = value as double;
+                            _pm25Value = value as double;
                           });
                         },
                         height: 20,
                         width: 20,
-                        color: _todayValue < 13
+                        color: _pm25Value < 13
                             ? Colors.green
-                            : _todayValue < 35
+                            : _pm25Value < 35
                                 ? Colors.amber
-                                : _todayValue < 55
+                                : _pm25Value < 55
                                     ? const Color(0xffFB7D55)
                                     : Colors.red,
                         position: LinearElementPosition.cross,
@@ -183,14 +182,14 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
                 ),
                 Text(
-                  _todayValue.toStringAsFixed(0),
+                  _pm10Value.toStringAsFixed(0),
                   style: TextStyle(
                       fontSize: 26,
-                      color: _todayValue < 13
+                      color: _pm10Value < 13
                           ? Colors.green
-                          : _todayValue < 35
+                          : _pm10Value < 35
                               ? Colors.amber
-                              : _todayValue < 55
+                              : _pm10Value < 55
                                   ? const Color(0xffFB7D55)
                                   : Colors.red,
                       fontWeight: FontWeight.bold),
@@ -215,19 +214,19 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
                   ),
                   markerPointers: <LinearMarkerPointer>[
                     LinearShapePointer(
-                        value: _todayValue,
+                        value: _pm10Value,
                         onChanged: (dynamic value) {
                           setState(() {
-                            _todayValue = value as double;
+                            _pm10Value = value as double;
                           });
                         },
                         height: 20,
                         width: 20,
-                        color: _todayValue < 13
+                        color: _pm10Value < 13
                             ? Colors.green
-                            : _todayValue < 35
+                            : _pm10Value < 35
                                 ? Colors.amber
-                                : _todayValue < 55
+                                : _pm10Value < 55
                                     ? const Color(0xffFB7D55)
                                     : Colors.red,
                         position: LinearElementPosition.cross,
@@ -320,3 +319,4 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
     );
   }
 }
+
