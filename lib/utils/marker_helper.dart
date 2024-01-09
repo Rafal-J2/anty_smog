@@ -1,12 +1,15 @@
+import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_rest_api/block/cubit/chart_panel_cubit.dart';
 import '../block/cubit/pm_data_cubit.dart';
+import '../school_model.dart';
 import 'marker_icon_loader.dart';
 
 class MarkerHelper {
   final MarkerIconLoader _iconLoader;
-  MarkerHelper(this._iconLoader, this.pmDataCubit);
-   final PMDataCubit pmDataCubit;
-
+  MarkerHelper(this._iconLoader, this.pmDataCubit, this.chartPanelCubit);
+  final PMDataCubit pmDataCubit;
+  final ChartPanelCubit chartPanelCubit;
 
 // This method builds a marker for a given station.
 // It takes a Map representing a station as a parameter.
@@ -14,9 +17,10 @@ class MarkerHelper {
 // The 'school' key should map to another Map containing 'name', 'latitude', and 'longitude' keys.
 // The 'data' key should map to another Map containing 'pm25_avg' key.
 // It returns a Marker object.
-  Marker buildMarker(Map<String, dynamic> station, ) {
-    num pm25Avg = station['data']['pm25_avg'] as num;
 
+  Marker buildMarker(
+    Map<String, dynamic> station) {
+    num pm25Avg = station['data']['pm25_avg'] as num;
     return Marker(
       markerId: MarkerId(station['school']['name'].toString()),
       position: LatLng(double.parse(station['school']['latitude']),
@@ -26,15 +30,50 @@ class MarkerHelper {
         snippet: 'PM 2.5: ${pm25Avg.toInt()}',
       ),
       onTap: () {
-        pmDataCubit.updateData(pm25Avg.toDouble()); 
+        pmDataCubit.updateData(
+          pm25Avg.toDouble()); // Retrieves data for a panel with charts
+          chartPanelCubit.togglePanel();
       },
-      icon: pm25Avg > 55
-          ? _iconLoader.markerIcon4
-          : pm25Avg > 35
-          ? _iconLoader.markerIcon3
-          : pm25Avg > 13
-          ? _iconLoader.markerIcon2
-          : _iconLoader.markerIcon,
+      icon: getIconBasedOnPm25(pm25Avg.toDouble()),
     );
+  }
+
+  Future<Marker> buildClusterMarker(Cluster<School> cluster) async {
+    // Oblicz średni PM2.5 dla klastra
+    double avgPm25 =
+        cluster.items.fold(0, (sum, school) => sum + school.pm25Avg as int) /
+            cluster.items.length;
+
+    // Ustal ikonę na podstawie średniego PM2.5
+    BitmapDescriptor icon = getIconBasedOnPm25(avgPm25);
+
+    return Marker(
+      markerId: MarkerId(cluster.isMultiple
+          ? cluster.getId()
+          : cluster.items.single.name.toString()),
+      position: cluster.location,
+      infoWindow: InfoWindow(
+        title: 'Klaster ${cluster.items.length} szkół',
+        snippet: 'Średni PM 2.5: ${avgPm25.toStringAsFixed(2)}',
+      ),
+      onTap: () {
+        // Możesz tu dodać specyficzną logikę dla tapnięcia na klaster
+      },
+      icon: icon,
+    );
+  }
+
+  BitmapDescriptor getIconBasedOnPm25(double pm25Avg) {
+    // Zwróć odpowiednią ikonę na podstawie wartości pm25Avg
+    // Na przykład:
+    if (pm25Avg > 55) {
+      return _iconLoader.markerIcon4;
+    } else if (pm25Avg > 35) {
+      return _iconLoader.markerIcon3;
+    } else if (pm25Avg > 13) {
+      return _iconLoader.markerIcon2;
+    } else {
+      return _iconLoader.markerIcon;
+    }
   }
 }
