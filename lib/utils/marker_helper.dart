@@ -32,19 +32,16 @@ class MarkerHelper {
       onTap: () {
         pmDataCubit.updateData(
           pm25Avg.toDouble()); // Retrieves data for a panel with charts
-          chartPanelCubit.togglePanel();
+          chartPanelCubit.togglePanel(true);
       },
       icon: getIconBasedOnPm25(pm25Avg.toDouble()),
     );
   }
 
   Future<Marker> buildClusterMarker(Cluster<School> cluster) async {
-    // Oblicz średni PM2.5 dla klastra
     double avgPm25 =
         cluster.items.fold(0, (sum, school) => sum + school.pm25Avg as int) /
             cluster.items.length;
-
-    // Ustal ikonę na podstawie średniego PM2.5
     BitmapDescriptor icon = getIconBasedOnPm25(avgPm25);
 
     return Marker(
@@ -57,15 +54,12 @@ class MarkerHelper {
         snippet: 'Średni PM 2.5: ${avgPm25.toStringAsFixed(2)}',
       ),
       onTap: () {
-        // Możesz tu dodać specyficzną logikę dla tapnięcia na klaster
       },
       icon: icon,
     );
   }
 
   BitmapDescriptor getIconBasedOnPm25(double pm25Avg) {
-    // Zwróć odpowiednią ikonę na podstawie wartości pm25Avg
-    // Na przykład:
     if (pm25Avg > 55) {
       return _iconLoader.markerIcon4;
     } else if (pm25Avg > 35) {

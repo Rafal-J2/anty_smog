@@ -27,7 +27,7 @@ var logger = Logger();
 class AntySmogAppState extends State<AntySmogApp> {
   late GoogleMapController _controller;
   MapType _currentMapType = MapType.normal;
-  bool _activateChartsPanel = false ;
+  bool _activateChartsPanel = false;
 
   /// Toggles the map type between normal (street view) and satellite when the map type button is pressed.
   /// This allows users to switch between different views of the map according to their preferences..
@@ -96,7 +96,8 @@ class AntySmogAppState extends State<AntySmogApp> {
                     GoogleMap(
                       onTap: (LatLng position) {
                         setState(() {
-                          _activateChartsPanel = false; // The operation of the function is described above in the documentation
+                          context.read<ChartPanelCubit>().togglePanel(false);
+                          // _activateChartsPanel = false; // The operation of the function is described above in the documentation
                         });
                       },
                       mapType: _currentMapType,
