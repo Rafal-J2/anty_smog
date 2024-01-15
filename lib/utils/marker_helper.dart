@@ -2,7 +2,7 @@ import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_rest_api/block/cubit/chart_panel_cubit.dart';
 import '../block/cubit/pm_data_cubit.dart';
-import '../school_model.dart';
+import '../services/school_model.dart';
 import 'marker_icon_loader.dart';
 
 class MarkerHelper {
@@ -38,9 +38,9 @@ class MarkerHelper {
     );
   }
 
-  Future<Marker> buildClusterMarker(Cluster<School> cluster) async {
+  Future<Marker> buildClusterMarker(Cluster<SchoolModel> cluster) async {
     double avgPm25 =
-        cluster.items.fold(0, (sum, school) => sum + school.pm25Avg as int) /
+        cluster.items.fold(0, (sum, school) => sum + school.pm25 as int) /
             cluster.items.length;
     BitmapDescriptor icon = getIconBasedOnPm25(avgPm25);
 

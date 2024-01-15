@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:google_maps_rest_api/screens/maps.dart';
 import '../block/location_gps.dart';
 import 'block/cubit/chart_panel_cubit.dart';
 import 'block/cubit/pm_data_cubit.dart';
 import '../block/marker_cubit.dart';
+import 'services/cluster_manager.dart';
 
 void main() {
   runApp(
@@ -25,7 +25,7 @@ void main() {
              context.read())..fetchAndSetMarkers(),
              ),
       ],
-      child:  const AntySmogApp (),
+      child:  const MyApp (),
     ),
   );
 }

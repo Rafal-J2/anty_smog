@@ -41,12 +41,6 @@ class AntySmogAppState extends State<AntySmogApp> {
 
   late ClusterManager<School> clusterManager;
 
-  // @override
-  // void initState() {
-  //   List<School> schools = [/*....*/];
-  //   clusterManager = ClusterManager<School>(schools, markerBuilder: _schoolMarkerBuilder);
-  //   super.initState();
-  // }
 
   Future<void> _printSavedCameraPosition() async {
     final prefs = await SharedPreferences.getInstance();
@@ -97,7 +91,7 @@ class AntySmogAppState extends State<AntySmogApp> {
                       onTap: (LatLng position) {
                         setState(() {
                           context.read<ChartPanelCubit>().togglePanel(false);
-                          // _activateChartsPanel = false; // The operation of the function is described above in the documentation
+
                         });
                       },
                       mapType: _currentMapType,
@@ -105,8 +99,6 @@ class AntySmogAppState extends State<AntySmogApp> {
                       zoomControlsEnabled: false,
                       onMapCreated: (GoogleMapController controller) async {
                         _controller = controller;
-                        //    googleMapController.complete(controller);
-                        //    clusterManager.setMapId(controller.mapId);
                         _printSavedCameraPosition();
                         _initialCameraPosition();
                       },
@@ -118,7 +110,6 @@ class AntySmogAppState extends State<AntySmogApp> {
                         target: LatLng(52.237049, 21.017532),
                         zoom: 6,
                       ),
-                      //   onCameraIdle: clusterManager.updateMap,
                       markers: state.values
                           .toSet(), // The operation of the function is described above in the documentation
                     ),
