@@ -1,5 +1,5 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../../screens/maps.dart';
+import '../screens/maps.dart';
 
 class PMDataState {
   final double pm25Value;

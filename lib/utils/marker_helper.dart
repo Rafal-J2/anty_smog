@@ -1,7 +1,7 @@
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_rest_api/block/cubit/chart_panel_cubit.dart';
-import '../block/cubit/pm_data_cubit.dart';
+import 'package:google_maps_rest_api/bloc/chart_panel_cubit.dart';
+import '../bloc/pm_data_cubit.dart';
 import '../services/school_model.dart';
 import 'marker_icon_loader.dart';
 

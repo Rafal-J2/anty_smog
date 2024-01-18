@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'block/gios_cubit/pm_gios_marker_cubit.dart';
+import 'bloc/gios_cubit/pm_gios_marker_cubit.dart';
 import 'services/get_api.dart';
 
 class AntySmogGiosApp extends StatefulWidget {

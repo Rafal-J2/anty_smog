@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:syncfusion_flutter_gauges/gauges.dart';
-import '../block/cubit/pm_data_cubit.dart';
+import '../bloc/pm_data_cubit.dart';
 
 class MarkerHelperUdate extends StatefulWidget {
   const MarkerHelperUdate({
@@ -14,7 +14,6 @@ class MarkerHelperUdate extends StatefulWidget {
 class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
   double _pm25Value = 50;
   double _pm10Value = 50;
-
 
   @override
   Widget build(BuildContext context) {

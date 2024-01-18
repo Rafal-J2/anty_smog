@@ -3,11 +3,13 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_rest_api/block/cubit/chart_panel_cubit.dart';
+import 'package:google_maps_rest_api/bloc/chart_panel_cubit.dart';
+import 'package:google_maps_rest_api/cluster%20manger/cluster_marker_manager.dart';
+import 'package:google_maps_rest_api/services/get_api.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../block/location_gps.dart';
-import '../block/marker_cubit.dart';
-import '../school_model.dart';
+import '../bloc/location_gps.dart';
+import '../bloc/marker_cubit.dart';
+import '../services/school_model.dart';
 import '../shared/map_service.dart';
 import '../shared/preferences_service.dart';
 import 'package:logger/logger.dart';
@@ -29,6 +31,15 @@ class AntySmogAppState extends State<AntySmogApp> {
   MapType _currentMapType = MapType.normal;
   bool _activateChartsPanel = false;
 
+  //final clusterMarkerManager = ClusterMarkerManager();
+
+//  final chartPanelCubit = ChartPanelCubit();
+// final clusterMarkerManager = ClusterMarkerManager(chartPanelCubit);
+  late ChartPanelCubit chartPanelCubit;
+  late ClusterMarkerManager clusterMarkerManager;
+
+  // final markerBuilder = ChartPanelCubit();
+
   /// Toggles the map type between normal (street view) and satellite when the map type button is pressed.
   /// This allows users to switch between different views of the map according to their preferences..
   void _onMapTypeButtonPressed() {
@@ -39,8 +50,49 @@ class AntySmogAppState extends State<AntySmogApp> {
     });
   }
 
-  late ClusterManager<School> clusterManager;
+  Set<Marker> markers = {};
+  late ClusterManager clusterManager;
+  List<SchoolModel> schoolList = [];
 
+  @override
+  void initState() {
+    chartPanelCubit = ChartPanelCubit();
+    clusterMarkerManager = ClusterMarkerManager(chartPanelCubit);
+    clusterManager = _initialClusterManager();
+    super.initState();
+
+    loadAndSetSchools();
+  }
+
+  ClusterManager _initialClusterManager() {
+    return ClusterManager<SchoolModel>(
+      schoolList,
+      _updateMarkers,
+      markerBuilder: clusterMarkerManager.markerBuilder,
+      levels: [1, 4.25, 5.25, 8.25, 11.0, 14.0, 15.5, 16.0, 19.5],
+      stopClusteringZoom: 10,
+    );
+  }
+
+  void _updateMarkers(Set<Marker> markers) {
+    setState(() {
+      this.markers = markers;
+    });
+  }
+
+  Future<void> loadAndSetSchools() async {
+    try {
+      List<dynamic> apiData = await fetchApiData();
+      logger.t('Data recived from API: $apiData');
+      List<SchoolModel> schools =
+          apiData.map((json) => SchoolModel.fromJson(json)).toList();
+      logger.t('List of schools created: $schools');
+      clusterManager.setItems(schools);
+      logger.t('ClusterManager');
+    } catch (e) {
+      logger.t('Error occurred: $e');
+    }
+  }
 
   Future<void> _printSavedCameraPosition() async {
     final prefs = await SharedPreferences.getInstance();
@@ -77,22 +129,16 @@ class AntySmogAppState extends State<AntySmogApp> {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: BlocBuilder<MarkerCubit, Map<String, Marker>>(
-            builder: (context, state) {
-              return BlocListener<ChartPanelCubit, bool>(
-                listener: (context, panelIsActive) {
-                  setState(() {
-                    _activateChartsPanel = panelIsActive;
-                  });
-                },
-                child: Stack(
-                  children: [
-                    GoogleMap(
-                      onTap: (LatLng position) {
-                        setState(() {
-                          context.read<ChartPanelCubit>().togglePanel(false);
-
-                        });
+          body: BlocBuilder<ChartPanelCubit, bool>(
+            builder: (context, panelIsActive) {
+              //   logger.d('BlocListener called with panelIsActive: $panelIsActive');
+              _activateChartsPanel = panelIsActive;
+            //   logger.d('_activateChartsPanel updated to: $_activateChartsPanel');
+              return Stack(
+                children: [
+                  GoogleMap(
+                      onTap: (LatLng position) {                
+                           context.read<ChartPanelCubit>().togglePanel(false);                 
                       },
                       mapType: _currentMapType,
                       myLocationButtonEnabled: false,
@@ -101,54 +147,55 @@ class AntySmogAppState extends State<AntySmogApp> {
                         _controller = controller;
                         _printSavedCameraPosition();
                         _initialCameraPosition();
+                        clusterManager.setMapId(controller.mapId);
                       },
                       onCameraMove: (CameraPosition position) {
                         PreferencesService().saveCameraPosition(position);
-                        //   clusterManager.onCameraMove(position);
+                        clusterManager.onCameraMove(position);
                       },
                       initialCameraPosition: const CameraPosition(
                         target: LatLng(52.237049, 21.017532),
                         zoom: 6,
                       ),
-                      markers: state.values
-                          .toSet(), // The operation of the function is described above in the documentation
-                    ),
-                    if (_activateChartsPanel)
-                      Positioned(
-                        bottom: 20,
-                        left: 20,
-                        child: Container(
-                          width: 500,
-                          height: 150,
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(12),
-                            boxShadow: [
-                              BoxShadow(
-                                color: Colors.black.withOpacity(0.2),
-                                blurRadius: 6,
-                                offset: const Offset(0, 2),
-                              ),
-                            ],
-                          ),
-                          child: const Padding(
-                            padding: EdgeInsets.all(8.0),
-                            child: MarkerHelperUdate(),
-                          ),
+                      onCameraIdle: clusterManager.updateMap,
+                      markers: markers
+                      //state.values.toSet(), // The operation of the function is described above in the documentation
+                      ),
+                  if (_activateChartsPanel)
+                    Positioned(
+                      bottom: 20,
+                      left: 20,
+                      child: Container(
+                        width: 500,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: MarkerHelperUdate(),
                         ),
                       ),
-                    Positioned(
-                      bottom: 240,
-                      right: 10,
-                      child: FloatingActionButton(
-                        onPressed: _onMapTypeButtonPressed,
-                        child: _currentMapType == MapType.normal
-                            ? const Icon(Icons.map)
-                            : const Icon(Icons.satellite),
-                      ),
                     ),
-                  ],
-                ),
+                  Positioned(
+                    bottom: 240,
+                    right: 10,
+                    child: FloatingActionButton(
+                      onPressed: _onMapTypeButtonPressed,
+                      child: _currentMapType == MapType.normal
+                          ? const Icon(Icons.map)
+                          : const Icon(Icons.satellite),
+                    ),
+                  ),
+                ],
               );
             },
           ),
