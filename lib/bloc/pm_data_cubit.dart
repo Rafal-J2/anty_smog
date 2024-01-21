@@ -10,7 +10,7 @@ class PMDataCubit extends Cubit<PMDataState> {
   PMDataCubit() : super(PMDataState(0));
 
   void updateData(double pm25Value) {
-    logger.i('PMDataCubit: Updating data to PM2.5 Value: $pm25Value');
+    logger.w('PMDataCubit: Updating data to PM2.5 Value: $pm25Value');
     emit(PMDataState(pm25Value));
   }
 }

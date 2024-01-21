@@ -1,8 +1,6 @@
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 
-//late ClusterManager clusterManager;
-
 class SchoolModel with ClusterItem {
   String name;
   double pm25;

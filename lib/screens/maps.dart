@@ -3,10 +3,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
-import 'package:google_maps_rest_api/bloc/chart_panel_cubit.dart';
 import 'package:google_maps_rest_api/cluster%20manger/cluster_marker_manager.dart';
 import 'package:google_maps_rest_api/services/get_api.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import '../bloc/chart_panel_cubit.dart';
 import '../bloc/location_gps.dart';
 import '../bloc/marker_cubit.dart';
 import '../services/school_model.dart';
@@ -14,6 +13,8 @@ import '../shared/map_service.dart';
 import '../shared/preferences_service.dart';
 import 'package:logger/logger.dart';
 import 'chart_panel.dart';
+
+
 
 class AntySmogApp extends StatefulWidget {
   const AntySmogApp({super.key});
@@ -30,15 +31,8 @@ class AntySmogAppState extends State<AntySmogApp> {
   late GoogleMapController _controller;
   MapType _currentMapType = MapType.normal;
   bool _activateChartsPanel = false;
-
-  //final clusterMarkerManager = ClusterMarkerManager();
-
-//  final chartPanelCubit = ChartPanelCubit();
-// final clusterMarkerManager = ClusterMarkerManager(chartPanelCubit);
   late ChartPanelCubit chartPanelCubit;
   late ClusterMarkerManager clusterMarkerManager;
-
-  // final markerBuilder = ChartPanelCubit();
 
   /// Toggles the map type between normal (street view) and satellite when the map type button is pressed.
   /// This allows users to switch between different views of the map according to their preferences..
@@ -60,7 +54,6 @@ class AntySmogAppState extends State<AntySmogApp> {
     clusterMarkerManager = ClusterMarkerManager(chartPanelCubit);
     clusterManager = _initialClusterManager();
     super.initState();
-
     loadAndSetSchools();
   }
 
@@ -94,16 +87,6 @@ class AntySmogAppState extends State<AntySmogApp> {
     }
   }
 
-  Future<void> _printSavedCameraPosition() async {
-    final prefs = await SharedPreferences.getInstance();
-    double? latitude = prefs.getDouble('latitude');
-    double? longitude = prefs.getDouble('longitude');
-    double? zoom = prefs.getDouble('zoom');
-    logger.i('Saved latitude: $latitude');
-    logger.i('Saved longitude: $longitude');
-    logger.i('Saved zoom: $zoom');
-  }
-
   /// Initializes the camera position to the last known user position.
   /// It retrieves the last known latitude, longitude, and zoom level from SharedPreferences,
   /// which are saved whenever the user checks the air quality.
@@ -129,75 +112,71 @@ class AntySmogAppState extends State<AntySmogApp> {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: BlocBuilder<ChartPanelCubit, bool>(
-            builder: (context, panelIsActive) {
-              //   logger.d('BlocListener called with panelIsActive: $panelIsActive');
-              _activateChartsPanel = panelIsActive;
-            //   logger.d('_activateChartsPanel updated to: $_activateChartsPanel');
-              return Stack(
-                children: [
-                  GoogleMap(
-                      onTap: (LatLng position) {                
-                           context.read<ChartPanelCubit>().togglePanel(false);                 
-                      },
-                      mapType: _currentMapType,
-                      myLocationButtonEnabled: false,
-                      zoomControlsEnabled: false,
-                      onMapCreated: (GoogleMapController controller) async {
-                        _controller = controller;
-                        _printSavedCameraPosition();
-                        _initialCameraPosition();
-                        clusterManager.setMapId(controller.mapId);
-                      },
-                      onCameraMove: (CameraPosition position) {
-                        PreferencesService().saveCameraPosition(position);
-                        clusterManager.onCameraMove(position);
-                      },
-                      initialCameraPosition: const CameraPosition(
-                        target: LatLng(52.237049, 21.017532),
-                        zoom: 6,
-                      ),
-                      onCameraIdle: clusterManager.updateMap,
-                      markers: markers
-                      //state.values.toSet(), // The operation of the function is described above in the documentation
-                      ),
-                  if (_activateChartsPanel)
-                    Positioned(
-                      bottom: 20,
-                      left: 20,
-                      child: Container(
-                        width: 500,
-                        height: 150,
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(12),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withOpacity(0.2),
-                              blurRadius: 6,
-                              offset: const Offset(0, 2),
-                            ),
-                          ],
-                        ),
-                        child: const Padding(
-                          padding: EdgeInsets.all(8.0),
-                          child: MarkerHelperUdate(),
-                        ),
-                      ),
+          body: BlocListener<ChartPanelCubit, ChartPanelState>(
+            listener: (context, state) {
+              _activateChartsPanel = state.isPanelVisible;
+            },
+            child: Stack(
+              children: [
+                GoogleMap(
+                    onTap: (LatLng position) {
+                      context.read<ChartPanelCubit>().togglePanel(true);
+                    },
+                    mapType: _currentMapType,
+                    myLocationButtonEnabled: false,
+                    zoomControlsEnabled: false,
+                    onMapCreated: (GoogleMapController controller) async {
+                      _controller = controller;
+                      //    _printSavedCameraPosition();
+                      _initialCameraPosition();
+                      clusterManager.setMapId(controller.mapId);
+                    },
+                    onCameraMove: (CameraPosition position) {
+                      PreferencesService().saveCameraPosition(position);
+                      clusterManager.onCameraMove(position);
+                    },
+                    initialCameraPosition: const CameraPosition(
+                      target: LatLng(52.237049, 21.017532),
+                      zoom: 6,
                     ),
+                    onCameraIdle: clusterManager.updateMap,
+                    markers: markers),
+                if (_activateChartsPanel)
                   Positioned(
-                    bottom: 240,
-                    right: 10,
-                    child: FloatingActionButton(
-                      onPressed: _onMapTypeButtonPressed,
-                      child: _currentMapType == MapType.normal
-                          ? const Icon(Icons.map)
-                          : const Icon(Icons.satellite),
+                    bottom: 20,
+                    left: 20,
+                    child: Container(
+                      width: 500,
+                      height: 150,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(12),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.2),
+                            blurRadius: 6,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: const Padding(
+                        padding: EdgeInsets.all(8.0),
+                        child: MarkerHelperUdate(),
+                      ),
                     ),
                   ),
-                ],
-              );
-            },
+                Positioned(
+                  bottom: 240,
+                  right: 10,
+                  child: FloatingActionButton(
+                    onPressed: _onMapTypeButtonPressed,
+                    child: _currentMapType == MapType.normal
+                        ? const Icon(Icons.map)
+                        : const Icon(Icons.satellite),
+                  ),
+                ),
+              ],
+            ),
           ),
 
           ///  LocationGps Cubit, and how it updates the user's current location on the map.
