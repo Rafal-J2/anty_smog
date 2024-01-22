@@ -14,8 +14,6 @@ import '../shared/preferences_service.dart';
 import 'package:logger/logger.dart';
 import 'chart_panel.dart';
 
-
-
 class AntySmogApp extends StatefulWidget {
   const AntySmogApp({super.key});
   @override
@@ -30,7 +28,6 @@ var logger = Logger();
 class AntySmogAppState extends State<AntySmogApp> {
   late GoogleMapController _controller;
   MapType _currentMapType = MapType.normal;
-  bool _activateChartsPanel = false;
   late ChartPanelCubit chartPanelCubit;
   late ClusterMarkerManager clusterMarkerManager;
 
@@ -51,7 +48,7 @@ class AntySmogAppState extends State<AntySmogApp> {
   @override
   void initState() {
     chartPanelCubit = ChartPanelCubit();
-    clusterMarkerManager = ClusterMarkerManager(chartPanelCubit);
+    clusterMarkerManager = ClusterMarkerManager();
     clusterManager = _initialClusterManager();
     super.initState();
     loadAndSetSchools();
@@ -61,7 +58,8 @@ class AntySmogAppState extends State<AntySmogApp> {
     return ClusterManager<SchoolModel>(
       schoolList,
       _updateMarkers,
-      markerBuilder: clusterMarkerManager.markerBuilder,
+      markerBuilder: (cluster) =>
+          clusterMarkerManager.markerBuilder(cluster, context),
       levels: [1, 4.25, 5.25, 8.25, 11.0, 14.0, 15.5, 16.0, 19.5],
       stopClusteringZoom: 10,
     );
@@ -76,12 +74,9 @@ class AntySmogAppState extends State<AntySmogApp> {
   Future<void> loadAndSetSchools() async {
     try {
       List<dynamic> apiData = await fetchApiData();
-      logger.t('Data recived from API: $apiData');
       List<SchoolModel> schools =
           apiData.map((json) => SchoolModel.fromJson(json)).toList();
-      logger.t('List of schools created: $schools');
       clusterManager.setItems(schools);
-      logger.t('ClusterManager');
     } catch (e) {
       logger.t('Error occurred: $e');
     }
@@ -112,71 +107,69 @@ class AntySmogAppState extends State<AntySmogApp> {
     return MaterialApp(
         debugShowCheckedModeBanner: false,
         home: Scaffold(
-          body: BlocListener<ChartPanelCubit, ChartPanelState>(
-            listener: (context, state) {
-              _activateChartsPanel = state.isPanelVisible;
-            },
-            child: Stack(
-              children: [
-                GoogleMap(
-                    onTap: (LatLng position) {
-                      context.read<ChartPanelCubit>().togglePanel(true);
-                    },
-                    mapType: _currentMapType,
-                    myLocationButtonEnabled: false,
-                    zoomControlsEnabled: false,
-                    onMapCreated: (GoogleMapController controller) async {
-                      _controller = controller;
-                      //    _printSavedCameraPosition();
-                      _initialCameraPosition();
-                      clusterManager.setMapId(controller.mapId);
-                    },
-                    onCameraMove: (CameraPosition position) {
-                      PreferencesService().saveCameraPosition(position);
-                      clusterManager.onCameraMove(position);
-                    },
-                    initialCameraPosition: const CameraPosition(
-                      target: LatLng(52.237049, 21.017532),
-                      zoom: 6,
+          body: BlocBuilder<ChartPanelCubit, bool>(
+            builder: (context, isVisible) {            
+              return Stack(
+                children: [
+                  GoogleMap(
+                      onTap: (LatLng position) {
+                        context.read<ChartPanelCubit>().togglePanel(false);
+                      },
+                      mapType: _currentMapType,
+                      myLocationButtonEnabled: false,
+                      zoomControlsEnabled: false,
+                      onMapCreated: (GoogleMapController controller) async {
+                        _controller = controller;
+                        _initialCameraPosition();
+                        clusterManager.setMapId(controller.mapId);
+                      },
+                      onCameraMove: (CameraPosition position) {
+                        PreferencesService().saveCameraPosition(position);
+                        clusterManager.onCameraMove(position);
+                      },
+                      initialCameraPosition: const CameraPosition(
+                        target: LatLng(52.237049, 21.017532),
+                        zoom: 6,
+                      ),
+                      onCameraIdle: clusterManager.updateMap,
+                      markers: markers),
+                  if (isVisible)
+                    Positioned(
+                      bottom: 20,
+                      left: 20,
+                      child: Container(
+                        width: 500,
+                        height: 150,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(12),
+                          boxShadow: [
+                            BoxShadow(
+                              color: Colors.black.withOpacity(0.2),
+                              blurRadius: 6,
+                              offset: const Offset(0, 2),
+                            ),
+                          ],
+                        ),
+                        child: const Padding(
+                          padding: EdgeInsets.all(8.0),
+                          child: MarkerHelperUdate(),
+                        ),
+                      ),
                     ),
-                    onCameraIdle: clusterManager.updateMap,
-                    markers: markers),
-                if (_activateChartsPanel)
                   Positioned(
-                    bottom: 20,
-                    left: 20,
-                    child: Container(
-                      width: 500,
-                      height: 150,
-                      decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(12),
-                        boxShadow: [
-                          BoxShadow(
-                            color: Colors.black.withOpacity(0.2),
-                            blurRadius: 6,
-                            offset: const Offset(0, 2),
-                          ),
-                        ],
-                      ),
-                      child: const Padding(
-                        padding: EdgeInsets.all(8.0),
-                        child: MarkerHelperUdate(),
-                      ),
+                    bottom: 240,
+                    right: 10,
+                    child: FloatingActionButton(
+                      onPressed: _onMapTypeButtonPressed,
+                      child: _currentMapType == MapType.normal
+                          ? const Icon(Icons.map)
+                          : const Icon(Icons.satellite),
                     ),
                   ),
-                Positioned(
-                  bottom: 240,
-                  right: 10,
-                  child: FloatingActionButton(
-                    onPressed: _onMapTypeButtonPressed,
-                    child: _currentMapType == MapType.normal
-                        ? const Icon(Icons.map)
-                        : const Icon(Icons.satellite),
-                  ),
-                ),
-              ],
-            ),
+                ],
+              );
+            },
           ),
 
           ///  LocationGps Cubit, and how it updates the user's current location on the map.

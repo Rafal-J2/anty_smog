@@ -1,18 +1,18 @@
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../bloc/chart_panel_cubit.dart';
 import '../services/school_model.dart';
 
 class ClusterMarkerManager {
-  final ChartPanelCubit chartPanelCubit;
-  ClusterMarkerManager(this.chartPanelCubit);
+  ClusterMarkerManager();
 
-  Future<Marker> Function(Cluster<SchoolModel>) get markerBuilder => (
-        cluster,
-      ) async {
+  Future<Marker> Function(
+      Cluster<SchoolModel>, BuildContext context) get markerBuilder => (cluster,
+          context) async {
         return Marker(
             markerId: MarkerId(cluster.isMultiple
                 ? cluster.getId()
@@ -35,7 +35,7 @@ class ClusterMarkerManager {
                 ? const InfoWindow()
                 : InfoWindow(title: cluster.items.single.name),
             onTap: () {
-             chartPanelCubit.togglePanel(true);
+                context.read<ChartPanelCubit>().togglePanel(true);
             });
       };
 

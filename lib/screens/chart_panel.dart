@@ -174,7 +174,6 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
         Row(
           children: [
             Column(
-              //   crossAxisAlignment: CrossAxisAlignment.start,
               children: <Widget>[
                 const Text(
                   'TODAY 2',
