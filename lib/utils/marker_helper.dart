@@ -1,8 +1,6 @@
-import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:google_maps_rest_api/bloc/chart_panel_cubit.dart';
 import '../bloc/pm_data_cubit.dart';
-import '../services/school_model.dart';
 import 'marker_icon_loader.dart';
 
 class MarkerHelper {
@@ -18,8 +16,7 @@ class MarkerHelper {
 // The 'data' key should map to another Map containing 'pm25_avg' key.
 // It returns a Marker object.
 
-  Marker buildMarker(
-    Map<String, dynamic> station) {
+  Marker buildMarker(Map<String, dynamic> station) {
     num pm25Avg = station['data']['pm25_avg'] as num;
     return Marker(
       markerId: MarkerId(station['school']['name'].toString()),
@@ -31,40 +28,23 @@ class MarkerHelper {
       ),
       onTap: () {
         pmDataCubit.updateData(
-          pm25Avg.toDouble()); // Retrieves data for a panel with charts
-          chartPanelCubit.togglePanel(true);
+            pm25Avg.toDouble()); // Retrieves data for a panel with charts
+        chartPanelCubit.togglePanel(true);
       },
       icon: getIconBasedOnPm25(pm25Avg.toDouble()),
     );
   }
 
-  Future<Marker> buildClusterMarker(Cluster<SchoolModel> cluster) async {
-    double avgPm25 =
-        cluster.items.fold(0, (sum, school) => sum + school.pm25 as int) /
-            cluster.items.length;
-    BitmapDescriptor icon = getIconBasedOnPm25(avgPm25);
-
-    return Marker(
-      markerId: MarkerId(cluster.isMultiple
-          ? cluster.getId()
-          : cluster.items.single.name.toString()),
-      position: cluster.location,
-      infoWindow: InfoWindow(
-        title: 'Klaster ${cluster.items.length} szkół',
-        snippet: 'Średni PM 2.5: ${avgPm25.toStringAsFixed(2)}',
-      ),
-      onTap: () {
-      },
-      icon: icon,
-    );
-  }
-
   BitmapDescriptor getIconBasedOnPm25(double pm25Avg) {
-    if (pm25Avg > 55) {
+    const highPm25Level = 55;
+    const mediumPm25Level = 35;
+    const lowPm25Level = 13;
+
+    if (pm25Avg > highPm25Level) {
       return _iconLoader.markerIcon4;
-    } else if (pm25Avg > 35) {
+    } else if (pm25Avg > mediumPm25Level) {
       return _iconLoader.markerIcon3;
-    } else if (pm25Avg > 13) {
+    } else if (pm25Avg > lowPm25Level) {
       return _iconLoader.markerIcon2;
     } else {
       return _iconLoader.markerIcon;

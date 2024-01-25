@@ -3,8 +3,10 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_rest_api/bloc/pm_data_cubit.dart';
 import 'package:google_maps_rest_api/cluster%20manger/cluster_marker_manager.dart';
 import 'package:google_maps_rest_api/services/get_api.dart';
+import 'package:google_maps_rest_api/utils/marker_icon_loader.dart';
 import '../bloc/chart_panel_cubit.dart';
 import '../bloc/location_gps.dart';
 import '../bloc/marker_cubit.dart';
@@ -30,6 +32,8 @@ class AntySmogAppState extends State<AntySmogApp> {
   MapType _currentMapType = MapType.normal;
   late ChartPanelCubit chartPanelCubit;
   late ClusterMarkerManager clusterMarkerManager;
+  PMDataCubit pmDataCubit = PMDataCubit();
+  MarkerIconLoader iconLoader = MarkerIconLoader();
 
   /// Toggles the map type between normal (street view) and satellite when the map type button is pressed.
   /// This allows users to switch between different views of the map according to their preferences..
@@ -47,11 +51,12 @@ class AntySmogAppState extends State<AntySmogApp> {
 
   @override
   void initState() {
-    chartPanelCubit = ChartPanelCubit();
-    clusterMarkerManager = ClusterMarkerManager();
-    clusterManager = _initialClusterManager();
     super.initState();
+    clusterMarkerManager = ClusterMarkerManager(pmDataCubit, iconLoader);
+    clusterManager = _initialClusterManager();
+    chartPanelCubit = ChartPanelCubit();
     loadAndSetSchools();
+    iconLoader.loadMarkerIcons();
   }
 
   ClusterManager _initialClusterManager() {
@@ -108,7 +113,7 @@ class AntySmogAppState extends State<AntySmogApp> {
         debugShowCheckedModeBanner: false,
         home: Scaffold(
           body: BlocBuilder<ChartPanelCubit, bool>(
-            builder: (context, isVisible) {            
+            builder: (context, isVisible) {
               return Stack(
                 children: [
                   GoogleMap(

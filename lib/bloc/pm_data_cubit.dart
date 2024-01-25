@@ -7,7 +7,9 @@ class PMDataState {
 }
 
 class PMDataCubit extends Cubit<PMDataState> {
-  PMDataCubit() : super(PMDataState(0));
+  PMDataCubit() : super(PMDataState(0)){
+  logger.d('PMDataCubit reveived data with ID: ${identityHashCode(this)}');
+  }
 
   void updateData(double pm25Value) {
     logger.w('PMDataCubit: Updating data to PM2.5 Value: $pm25Value');
