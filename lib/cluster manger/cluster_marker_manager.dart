@@ -19,7 +19,7 @@ class ClusterMarkerManager {
         return Marker(
             markerId: MarkerId(cluster.isMultiple
                 ? cluster.getId()
-                : cluster.items.single.schoolName.toString()),
+                : cluster.items.single.schoolName),
             position: cluster.location,
             icon: cluster.isMultiple
                 ? await getClusterIcon(cluster) : await getIconBasedOnPm25(cluster.items.single, iconLoader), 

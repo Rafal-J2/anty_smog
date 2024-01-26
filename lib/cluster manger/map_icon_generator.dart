@@ -1,3 +1,4 @@
+import 'dart:math';
 import 'dart:ui';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
@@ -6,84 +7,132 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 import '../services/school_model.dart';
 import '../utils/marker_icon_loader.dart';
 
+
+ // Define the thresholds for each air quality level
+const highPm25Level = 55;
+const mediumPm25Level = 35;
+const lowPm25Level = 13;
+
+// Generates a cluster icon based on air quality data
 Future<BitmapDescriptor> getClusterIcon(Cluster<SchoolModel> cluster) async {
-  int countZero =
-      cluster.items.where((element) => element.airQualityPm25 == 0).length;
-  int countOne =
-      cluster.items.where((element) => element.airQualityPm25 == 1).length;
-  return await getMarkerBitmap(150, 150, countZero, countOne,
+  // Count the number of items in each air quality category
+  int countZero = cluster.items
+      .where((element) => element.airQualityPm25 <= lowPm25Level)
+      .length; // Green category
+  int countOne = cluster.items
+      .where((element) =>
+          element.airQualityPm25 > 13 &&
+          element.airQualityPm25 <= mediumPm25Level)
+      .length; // Yellow category
+  int countTwo = cluster.items
+      .where((element) =>
+          element.airQualityPm25 > 35 &&
+          element.airQualityPm25 <= highPm25Level)
+      .length; // Orangecategory
+  int countThree = cluster.items
+      .where((element) => element.airQualityPm25 > highPm25Level)
+      .length; // Red category
+
+  return await getMarkerBitmap(
+      150, 150, countZero, countOne, countTwo, countThree,
       text: cluster.count.toString());
 }
 
-Future<BitmapDescriptor> getSingleMarkerIcon(SchoolModel item) async {
-  String imagePath = item.airQualityPm25 == 0
-      ? "assets/images/dot_red_48.png"
-      : "assets/images/dot_green_48.png";
-  return await BitmapDescriptor.fromAssetImage(
-      const ImageConfiguration(size: Size(48, 48)), imagePath);
+// Determines the icon based on the airQualityPm25 value
+Future<BitmapDescriptor> getIconBasedOnPm25(
+    SchoolModel item, MarkerIconLoader iconLoader) async {
+   // Return the appropriate icon based on the air quality value
+  if (item.airQualityPm25 > highPm25Level) {
+    return iconLoader.markerIcon4;  // Red for high levels
+  } else if (item.airQualityPm25 > mediumPm25Level) {
+    return iconLoader.markerIcon3; // Orange for values > 35 and <= 55
+  } else if (item.airQualityPm25 > lowPm25Level) {
+    return iconLoader.markerIcon2; // Orange for values > 35 and <= 55
+  } else {
+    return iconLoader.markerIcon; // Default case (green)
+  }
 }
 
-
-
-
- Future<BitmapDescriptor> getIconBasedOnPm25(SchoolModel item, MarkerIconLoader iconLoader) async {
-  const highPm25Level = 55;
-  const mediumPm25Level = 35;
-  const lowPm25Level = 13;
-
-  if (item.airQualityPm25 > highPm25Level) {
-    return iconLoader.markerIcon4; 
-  } else if (item.airQualityPm25 > mediumPm25Level) {
-    return iconLoader.markerIcon3; 
-  } else if (item.airQualityPm25 > lowPm25Level) {
-    return iconLoader.markerIcon2;
-  } else {
-    return iconLoader.markerIcon; 
-  }
-  }
-
-Future<BitmapDescriptor> getMarkerBitmap(
-    int size, double size2, int typeZeroLength, int typeOneLength,
+// Creates a bitmap representation of the cluster icon
+Future<BitmapDescriptor> getMarkerBitmap(int width, int height, int countZero,
+    int countOne, int countTwo, int countThree,
     {String? text}) async {
-  if (kIsWeb) size = (size / 2).floor();
-
+  // Setup for drawing
   final PictureRecorder pictureRecorder = PictureRecorder();
   final Canvas canvas = Canvas(pictureRecorder);
-  final Paint paint1 = Paint()..color = const Color(0xFF4051B5);
-  final Paint paint2 = Paint()..color = Colors.white;
-  final Paint paint3 = Paint()..color = Colors.red;
+  // Define paints for each air quality category
+  final Paint paintGreen = Paint()..color = Colors.green;
+  final Paint paintYellow = Paint()..color = Colors.yellow;
+  final Paint paintOrange = Paint()..color = Colors.orange;
+  final Paint paintRed = Paint()..color = Colors.red;
+  final Paint paintWhite = Paint()..color = Colors.white;
+  
+// Calculate the total number of items
+  int total = countZero + countOne + countTwo + countThree;
+  total = max(total, 1);
+ 
+  // Calculate the start angle
+  double startAngle = -pi / 2;  // Start from the top
+  double sweepAngleGreen = 2 * pi * (countZero / total);
+  double sweepAngleYellow = 2 * pi * (countOne / total);
+  double sweepAngleOrange = 2 * pi * (countTwo / total);
+  double sweepAngleRed = 2 * pi * (countThree / total);
 
-  double degreesToRads(num deg) {
-    return (deg * 3.14) / 180.0;
-  }
+// Draw each sector on the canvas
+  canvas.drawArc(
+    Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    startAngle,
+    sweepAngleGreen,
+    true,
+    paintGreen,
+  );
+  startAngle += sweepAngleGreen;
 
-  int total = typeZeroLength + typeOneLength;
-  var totalRatio = 2.09439666667 * 3;
-  double percentageOfLength = (typeZeroLength / total);
-  var resultRatio = totalRatio * percentageOfLength;
+  canvas.drawArc(
+    Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+    startAngle,
+    sweepAngleYellow,
+    true,
+    paintYellow,
+  );
+  startAngle += sweepAngleYellow;
 
-  canvas.drawCircle(Offset(size / 2, size / 2), size / 2.0, paint1);
-  canvas.drawCircle(Offset(size / 2, size / 2), size / 2.8, paint1);
-  canvas.drawCircle(Offset(size / 2, size / 2), size / 3.8, paint3);
-  canvas.drawArc(const Offset(0, 0) & Size(size2, size2), degreesToRads(90.0),
-      resultRatio, true, paint3);
-  canvas.drawCircle(Offset(size / 2, size / 2), size / 3.2, paint2);
+  canvas.drawArc(Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+      startAngle, sweepAngleOrange, true, paintOrange);
+  startAngle += sweepAngleOrange;
+
+  canvas.drawArc(Rect.fromLTWH(0, 0, width.toDouble(), height.toDouble()),
+      startAngle, sweepAngleRed, true, paintRed);
+  startAngle += sweepAngleRed;
+
+  double innerCircleRadius = height / 3.2;
+  canvas.drawCircle(
+    Offset(width / 2, height / 2),
+    innerCircleRadius,
+    paintWhite,
+  );
+  // Add text to the center, if provided
   if (text != null) {
-    TextPainter painter = TextPainter(textDirection: TextDirection.ltr);
-    painter.text = TextSpan(
-      text: text,
-      style: TextStyle(
-          fontSize: size / 3,
+    TextPainter painter = TextPainter(
+      text: TextSpan(
+        text: text,
+        style: TextStyle(
+          fontSize: height / 3,
           color: Colors.black,
-          fontWeight: FontWeight.normal),
+          fontWeight: FontWeight.bold,
+        ),
+      ),
+      textDirection: TextDirection.ltr,
     );
     painter.layout();
     painter.paint(
       canvas,
-      Offset(size / 2 - painter.width / 2, size / 2 - painter.height / 2),
+      Offset((width - painter.width) / 2, (height - painter.height) / 2),
     );
   }
-  final img = await pictureRecorder.endRecording().toImage(size, size);
+
+  // Finish drawing and convert to an image
+  final img = await pictureRecorder.endRecording().toImage(width, height);
   final data = await img.toByteData(format: ImageByteFormat.png) as ByteData;
   return BitmapDescriptor.fromBytes(data.buffer.asUint8List());
 }
