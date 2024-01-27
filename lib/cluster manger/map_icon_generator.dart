@@ -43,13 +43,13 @@ Future<BitmapDescriptor> getIconBasedOnPm25(
     SchoolModel item, MarkerIconLoader iconLoader) async {
    // Return the appropriate icon based on the air quality value
   if (item.airQualityPm25 > highPm25Level) {
-    return iconLoader.markerIcon4;  // Red for high levels
+    return iconLoader.getMarkerIcon('assets/images/dot_red_48.png');  // Red for high levels
   } else if (item.airQualityPm25 > mediumPm25Level) {
-    return iconLoader.markerIcon3; // Orange for values > 35 and <= 55
+    return iconLoader.getMarkerIcon('assets/images/dot_orange_48.png'); // Orange for values > 35 and <= 55
   } else if (item.airQualityPm25 > lowPm25Level) {
-    return iconLoader.markerIcon2; // Orange for values > 35 and <= 55
+    return iconLoader.getMarkerIcon('assets/images/dot_yellow_48.png'); // Orange for values > 35 and <= 55
   } else {
-    return iconLoader.markerIcon; // Default case (green)
+    return iconLoader.getMarkerIcon('assets/images/dot_green_48.png'); // Default case (green)
   }
 }
 

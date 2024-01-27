@@ -9,12 +9,14 @@ import 'package:google_maps_rest_api/services/get_api.dart';
 import 'package:google_maps_rest_api/utils/marker_icon_loader.dart';
 import '../bloc/chart_panel_cubit.dart';
 import '../bloc/location_gps.dart';
-import '../bloc/marker_cubit.dart';
 import '../services/school_model.dart';
 import '../shared/map_service.dart';
 import '../shared/preferences_service.dart';
 import 'package:logger/logger.dart';
 import 'chart_panel.dart';
+import 'package:get_it/get_it.dart';
+
+final GetIt getIt = GetIt.instance;
 
 class AntySmogApp extends StatefulWidget {
   const AntySmogApp({super.key});
@@ -91,8 +93,10 @@ class AntySmogAppState extends State<AntySmogApp> {
   /// It retrieves the last known latitude, longitude, and zoom level from SharedPreferences,
   /// which are saved whenever the user checks the air quality.
   void _initialCameraPosition() async {
-    CameraPosition position = await MapService().initCameraPosition();
+    var mapService = getIt<MapService>();
+    CameraPosition position = await mapService.initCameraPosition();
     _controller.animateCamera(CameraUpdate.newCameraPosition(position));
+    logger.i('message');
   }
 
   /// Builds the main application widget.
@@ -117,11 +121,12 @@ class AntySmogAppState extends State<AntySmogApp> {
               return Stack(
                 children: [
                   GoogleMap(
+                      myLocationEnabled: true,
+                      myLocationButtonEnabled: false,
                       onTap: (LatLng position) {
                         context.read<ChartPanelCubit>().togglePanel(false);
                       },
                       mapType: _currentMapType,
-                      myLocationButtonEnabled: false,
                       zoomControlsEnabled: false,
                       onMapCreated: (GoogleMapController controller) async {
                         _controller = controller;
