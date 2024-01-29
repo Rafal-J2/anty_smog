@@ -1,18 +1,15 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
-import '../screens/maps.dart';
 
 class PMDataState {
   final double pm25Value;
-  PMDataState(this.pm25Value);
+  final double pm10Value;
+  PMDataState(this.pm25Value, this.pm10Value);
 }
 
 class PMDataCubit extends Cubit<PMDataState> {
-  PMDataCubit() : super(PMDataState(0)){
-  logger.d('PMDataCubit reveived data with ID: ${identityHashCode(this)}');
-  }
+  PMDataCubit() : super(PMDataState(0, 0));
 
-  void updateData(double pm25Value) {
-    logger.w('PMDataCubit: Updating data to PM2.5 Value: $pm25Value');
-    emit(PMDataState(pm25Value));
+  void updateData(double pm25Value, double pm10Value) {
+    emit(PMDataState(pm25Value, pm10Value));
   }
 }

@@ -3,12 +3,12 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_cluster_manager/google_maps_cluster_manager.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:google_maps_rest_api/bloc/location_gps.dart';
 import 'package:google_maps_rest_api/bloc/pm_data_cubit.dart';
 import 'package:google_maps_rest_api/cluster%20manger/cluster_marker_manager.dart';
 import 'package:google_maps_rest_api/services/get_api.dart';
 import 'package:google_maps_rest_api/utils/marker_icon_loader.dart';
 import '../bloc/chart_panel_cubit.dart';
-import '../bloc/location_gps.dart';
 import '../services/school_model.dart';
 import '../shared/map_service.dart';
 import '../shared/preferences_service.dart';
@@ -36,6 +36,7 @@ class AntySmogAppState extends State<AntySmogApp> {
   late ClusterMarkerManager clusterMarkerManager;
   PMDataCubit pmDataCubit = PMDataCubit();
   MarkerIconLoader iconLoader = MarkerIconLoader();
+  final LocationGps locationGps = LocationGps();
 
   /// Toggles the map type between normal (street view) and satellite when the map type button is pressed.
   /// This allows users to switch between different views of the map according to their preferences..
@@ -93,10 +94,13 @@ class AntySmogAppState extends State<AntySmogApp> {
   /// It retrieves the last known latitude, longitude, and zoom level from SharedPreferences,
   /// which are saved whenever the user checks the air quality.
   void _initialCameraPosition() async {
-    var mapService = getIt<MapService>();
-    CameraPosition position = await mapService.initCameraPosition();
-    _controller.animateCamera(CameraUpdate.newCameraPosition(position));
-    logger.i('message');
+    try {
+      var mapService = getIt<MapService>();
+      CameraPosition position = await mapService.initCameraPosition();
+      _controller.animateCamera(CameraUpdate.newCameraPosition(position));
+    } catch (e) {
+      logger.e('Error initializing camera position $e');
+    }
   }
 
   /// Builds the main application widget.
@@ -122,12 +126,12 @@ class AntySmogAppState extends State<AntySmogApp> {
                 children: [
                   GoogleMap(
                       myLocationEnabled: true,
-                      myLocationButtonEnabled: false,
+                      myLocationButtonEnabled: true,         
+                      zoomControlsEnabled: true,
                       onTap: (LatLng position) {
                         context.read<ChartPanelCubit>().togglePanel(false);
                       },
                       mapType: _currentMapType,
-                      zoomControlsEnabled: false,
                       onMapCreated: (GoogleMapController controller) async {
                         _controller = controller;
                         _initialCameraPosition();
@@ -177,32 +181,53 @@ class AntySmogAppState extends State<AntySmogApp> {
                           : const Icon(Icons.satellite),
                     ),
                   ),
+                  Positioned(
+                    bottom: 140,
+                    right: 10,
+                    child: FloatingActionButton(
+                      onPressed: () async {
+                        try {
+                          Position? position =
+                              await locationGps.getCurrentLocation();
+                          if (position != null) {
+                            _controller.animateCamera(
+                              CameraUpdate.newCameraPosition(
+                                CameraPosition(
+                                  target: LatLng(
+                                      position.latitude, position.longitude),
+                                  zoom: 12,
+                                ),
+                              ),
+                            );
+                          } else {
+                            logger.i("Location is not available");
+                          }
+                        } catch (e) {
+                          if (!mounted) return;
+                          showDialog(
+                            context: context,
+                            builder: (BuildContext context) {
+                              return AlertDialog(
+                                title: const Text('Błąd'),
+                                content:
+                                    Text('Nie można uzyskać lokalizacji: $e'),
+                                actions: <Widget>[
+                                  TextButton(
+                                    child: const Text('OK'),
+                                    onPressed: () {
+                                      Navigator.of(context).pop();
+                                    },
+                                  ),
+                                ],
+                              );
+                            },
+                          );
+                        }
+                      },
+                      child: const Icon(Icons.my_location),
+                    ),
+                  )
                 ],
-              );
-            },
-          ),
-
-          ///  LocationGps Cubit, and how it updates the user's current location on the map.
-          ///  Floating Action Button: A widget that triggers fetching the user's current location.
-          floatingActionButton: BlocConsumer<LocationGps, Position?>(
-            listener: (context, position) {},
-            builder: (context, position) {
-              return FloatingActionButton(
-                onPressed: () {
-                  if (position != null) {
-                    final locationCubit = BlocProvider.of<LocationGps>(context);
-                    locationCubit.getCurrentLocation();
-                    _controller.animateCamera(
-                      CameraUpdate.newCameraPosition(
-                        CameraPosition(
-                          target: LatLng(position.latitude, position.longitude),
-                          zoom: 12,
-                        ),
-                      ),
-                    );
-                  }
-                },
-                child: const Icon(Icons.my_location),
               );
             },
           ),

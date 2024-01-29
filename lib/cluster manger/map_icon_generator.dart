@@ -38,7 +38,7 @@ Future<BitmapDescriptor> getClusterIcon(Cluster<SchoolModel> cluster) async {
       text: cluster.count.toString());
 }
 
-// Determines the icon based on the airQualityPm25 value
+// Select an icon based on the airQualityPm25 value
 Future<BitmapDescriptor> getIconBasedOnPm25(
     SchoolModel item, MarkerIconLoader iconLoader) async {
    // Return the appropriate icon based on the air quality value

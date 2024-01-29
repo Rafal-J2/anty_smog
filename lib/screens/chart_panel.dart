@@ -34,7 +34,7 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
             Column(
               children: <Widget>[
                 const Text(
-                  'TODAY 2',
+                  'TODAY 1',
                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
                 ),
                 Text(

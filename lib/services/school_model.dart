@@ -4,6 +4,7 @@ import 'package:google_maps_flutter/google_maps_flutter.dart';
 class SchoolModel with ClusterItem {
   String schoolName;
   double airQualityPm25;
+  double airQualityPm10;
   LatLng latLng;
   String city;
 
@@ -11,6 +12,7 @@ class SchoolModel with ClusterItem {
     required this.schoolName,
     required this.latLng,
     required this.airQualityPm25,
+    required this.airQualityPm10,
     required this.city,
   });
   @override
@@ -21,6 +23,7 @@ class SchoolModel with ClusterItem {
         latLng: LatLng(double.parse(json['school']['latitude']),
             double.parse(json['school']['longitude'])),
         airQualityPm25: json['data']['pm25_avg'],
+        airQualityPm10: json['data']['pm10_avg'],
         schoolName: json['school']['name'],
         city: json['school']['city']);
   }
