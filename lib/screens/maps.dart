@@ -125,9 +125,9 @@ class AntySmogAppState extends State<AntySmogApp> {
               return Stack(
                 children: [
                   GoogleMap(
-                      myLocationEnabled: true,
+                    myLocationEnabled: true,
                       myLocationButtonEnabled: true,         
-                      zoomControlsEnabled: true,
+                      mapToolbarEnabled: false,        
                       onTap: (LatLng position) {
                         context.read<ChartPanelCubit>().togglePanel(false);
                       },
@@ -152,7 +152,7 @@ class AntySmogAppState extends State<AntySmogApp> {
                       bottom: 20,
                       left: 20,
                       child: Container(
-                        width: 500,
+                        width: MediaQuery.of(context).size.width * 0.9,
                         height: 150,
                         decoration: BoxDecoration(
                           color: Colors.white,
@@ -182,7 +182,7 @@ class AntySmogAppState extends State<AntySmogApp> {
                     ),
                   ),
                   Positioned(
-                    bottom: 140,
+                    bottom: 180,
                     right: 10,
                     child: FloatingActionButton(
                       onPressed: () async {
@@ -210,7 +210,7 @@ class AntySmogAppState extends State<AntySmogApp> {
                               return AlertDialog(
                                 title: const Text('Błąd'),
                                 content:
-                                    Text('Nie można uzyskać lokalizacji: $e'),
+                                    Text('Location cannot be obtained: $e'),
                                 actions: <Widget>[
                                   TextButton(
                                     child: const Text('OK'),

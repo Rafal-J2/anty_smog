@@ -12,19 +12,49 @@ class MarkerHelperUdate extends StatefulWidget {
 }
 
 class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
+  // Initial values for PM2.5 and PM10 measurements.
   double _pm25Value = 50;
   double _pm10Value = 50;
 
   @override
   Widget build(BuildContext context) {
+    // Listen for changes in PMDataCubit state and rebuild the gauge.
     return BlocBuilder<PMDataCubit, PMDataState>(
       builder: (context, state) {
         _pm25Value = state.pm25Value;
+        _pm10Value = state.pm10Value;
         return buildQualityGauge();
       },
     );
   }
 
+  // Helper function to create text style.
+  TextStyle textStyle(double size, FontWeight weight) =>
+      TextStyle(fontSize: size, fontWeight: weight);
+
+// Determines the color based on the PM value.
+  Color valueColor(double value) {
+    if (value < 13) {
+      return Colors.green;
+    } else if (value < 35) {
+      return Colors.amber;
+    } else if (value < 55) {
+      return const Color(0xffFB7D55);
+    } else {
+      return Colors.red;
+    }
+  }
+
+// Builds a pointer widget for the gauge.
+  LinearWidgetPointer buildPointer(double value, String text) =>
+      LinearWidgetPointer(
+          value: value,
+          position: LinearElementPosition.outside,
+          child: MediaQuery.of(context).size.width > 360
+              ? Text(text, style: textStyle(12, FontWeight.normal))
+              : const SizedBox.shrink());
+
+// Constructs the quality gauge widget.
   Widget buildQualityGauge() {
     final Brightness brightness = Theme.of(context).brightness;
     return Column(
@@ -33,23 +63,14 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
           children: [
             Column(
               children: <Widget>[
-                const Text(
-                  'TODAY 1',
-                  style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
-                ),
-                Text(
-                  _pm25Value.toStringAsFixed(0),
-                  style: TextStyle(
-                      fontSize: 26,
-                      color: _pm25Value < 13
-                          ? Colors.green
-                          : _pm25Value < 35
-                              ? Colors.amber
-                              : _pm25Value < 55
-                                  ? const Color(0xffFB7D55)
-                                  : Colors.red,
-                      fontWeight: FontWeight.bold),
-                )
+                const Text('PM 2,5',
+                    style:
+                        TextStyle(fontSize: 10, fontWeight: FontWeight.w500)),
+                Text(_pm25Value.toStringAsFixed(0),
+                    style: TextStyle(
+                        fontSize: 26,
+                        color: valueColor(_pm25Value),
+                        fontWeight: FontWeight.bold))
               ],
             ),
             Expanded(
@@ -64,11 +85,11 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
                   minorTicksPerInterval: 0,
                   axisTrackStyle: LinearAxisTrackStyle(
                     thickness: 15,
-                    color: brightness == Brightness.dark
+                    color: Theme.of(context).brightness == Brightness.dark
                         ? Colors.transparent
                         : Colors.grey[350],
                   ),
-                  markerPointers: <LinearMarkerPointer>[
+                  markerPointers: [
                     LinearShapePointer(
                         value: _pm25Value,
                         onChanged: (dynamic value) {
@@ -78,95 +99,47 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
                         },
                         height: 20,
                         width: 20,
-                        color: _pm25Value < 13
-                            ? Colors.green
-                            : _pm25Value < 35
-                                ? Colors.amber
-                                : _pm25Value < 55
-                                    ? const Color(0xffFB7D55)
-                                    : Colors.red,
+                        color: valueColor(_pm25Value),
                         position: LinearElementPosition.cross,
                         shapeType: LinearShapePointerType.circle),
-                    const LinearWidgetPointer(
-                      value: 13,
-                      enableAnimation: true,
-                      position: LinearElementPosition.outside,
-                      offset: 4,
-                      child: Text(
-                        'Doskonała',
-                        style: TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    const LinearWidgetPointer(
-                      value: 35,
-                      enableAnimation: true,
-                      position: LinearElementPosition.outside,
-                      offset: 4,
-                      child: Text(
-                        'Dobra',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    const LinearWidgetPointer(
-                      value: 55,
-                      enableAnimation: true,
-                      position: LinearElementPosition.outside,
-                      offset: 4,
-                      child: Text(
-                        'Umiarkowana',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    const LinearWidgetPointer(
-                      value: 75,
-                      enableAnimation: true,
-                      position: LinearElementPosition.outside,
-                      offset: 4,
-                      child: Text(
-                        'Zła',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    )
+                    buildPointer(13, 'Doskonała'),
+                    buildPointer(35, 'Dobra'),
+                    buildPointer(55, 'Umiarkowana'),
+                    buildPointer(75, 'Zła'),
                   ],
-                  ranges: const <LinearGaugeRange>[
+                  ranges: const [
                     LinearGaugeRange(
-                      startValue: 1.0,
-                      endValue: 13,
-                      startWidth: 8,
-                      midWidth: 8,
-                      endWidth: 8,
-                      position: LinearElementPosition.cross,
-                      color: Colors.green,
-                    ),
+                        startValue: 1.0,
+                        endValue: 13,
+                        startWidth: 8,
+                        midWidth: 8,
+                        endWidth: 8,
+                        position: LinearElementPosition.cross,
+                        color: Colors.green),
                     LinearGaugeRange(
-                      startValue: 13.0,
-                      endValue: 35,
-                      startWidth: 8,
-                      position: LinearElementPosition.cross,
-                      midWidth: 8,
-                      endWidth: 8,
-                      color: Colors.amber,
-                    ),
+                        startValue: 13.0,
+                        endValue: 35,
+                        startWidth: 8,
+                        position: LinearElementPosition.cross,
+                        midWidth: 8,
+                        endWidth: 8,
+                        color: Colors.amber),
                     LinearGaugeRange(
-                      startValue: 35.0,
-                      endValue: 55,
-                      position: LinearElementPosition.cross,
-                      startWidth: 8,
-                      midWidth: 8,
-                      endWidth: 8,
-                      color: Color(0xffFB7D55),
-                    ),
+                        startValue: 35.0,
+                        endValue: 55,
+                        position: LinearElementPosition.cross,
+                        startWidth: 8,
+                        midWidth: 8,
+                        endWidth: 8,
+                        color: Color(0xffFB7D55)),
                     LinearGaugeRange(
-                      startValue: 55.0,
-                      endValue: 75,
-                      position: LinearElementPosition.cross,
-                      startWidth: 8,
-                      midWidth: 8,
-                      endWidth: 8,
-                      color: Colors.red,
-                    ),
+                        startValue: 55.0,
+                        endValue: 75,
+                        position: LinearElementPosition.cross,
+                        startWidth: 8,
+                        midWidth: 8,
+                        endWidth: 8,
+                        color: Colors.red),
                   ]),
             ),
           ],
@@ -176,20 +149,14 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
             Column(
               children: <Widget>[
                 const Text(
-                  'TODAY 2',
+                  'PM 10',
                   style: TextStyle(fontSize: 10, fontWeight: FontWeight.w500),
                 ),
                 Text(
                   _pm10Value.toStringAsFixed(0),
                   style: TextStyle(
                       fontSize: 26,
-                      color: _pm10Value < 13
-                          ? Colors.green
-                          : _pm10Value < 35
-                              ? Colors.amber
-                              : _pm10Value < 55
-                                  ? const Color(0xffFB7D55)
-                                  : Colors.red,
+                      color: valueColor(_pm10Value),
                       fontWeight: FontWeight.bold),
                 )
               ],
@@ -220,57 +187,13 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
                         },
                         height: 20,
                         width: 20,
-                        color: _pm10Value < 13
-                            ? Colors.green
-                            : _pm10Value < 35
-                                ? Colors.amber
-                                : _pm10Value < 55
-                                    ? const Color(0xffFB7D55)
-                                    : Colors.red,
+                        color: valueColor(_pm25Value),
                         position: LinearElementPosition.cross,
                         shapeType: LinearShapePointerType.circle),
-                    const LinearWidgetPointer(
-                      value: 13,
-                      enableAnimation: true,
-                      position: LinearElementPosition.outside,
-                      offset: 4,
-                      child: Text(
-                        'Doskonała',
-                        style: TextStyle(
-                          fontSize: 12,
-                        ),
-                      ),
-                    ),
-                    const LinearWidgetPointer(
-                      value: 35,
-                      enableAnimation: true,
-                      position: LinearElementPosition.outside,
-                      offset: 4,
-                      child: Text(
-                        'Dobra',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    const LinearWidgetPointer(
-                      value: 55,
-                      enableAnimation: true,
-                      position: LinearElementPosition.outside,
-                      offset: 4,
-                      child: Text(
-                        'Umiarkowana',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    ),
-                    const LinearWidgetPointer(
-                      value: 75,
-                      enableAnimation: true,
-                      position: LinearElementPosition.outside,
-                      offset: 4,
-                      child: Text(
-                        'Zła',
-                        style: TextStyle(fontSize: 12),
-                      ),
-                    )
+                    buildPointer(13, 'Doskonała'),
+                    buildPointer(35, 'Dobra'),
+                    buildPointer(55, 'Umiarkowana'),
+                    buildPointer(75, 'Zła'),
                   ],
                   ranges: const <LinearGaugeRange>[
                     LinearGaugeRange(
@@ -317,4 +240,3 @@ class _MarkerHelperUdateState extends State<MarkerHelperUdate> {
     );
   }
 }
-
