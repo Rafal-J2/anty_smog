@@ -49,3 +49,19 @@ app.*.map.json
 **/windows/flutter/generated_plugin_registrant.*
 **/windows/flutter/generated_plugins.cmake
 pubspec.lock
+
+# Custom ignore rules for Linux and Windows specific files
+linux/CMakeLists.txt
+linux/main.cc
+linux/my_application.cc
+linux/flutter/
+windows/CMakeLists.txt
+windows/runner/CMakeLists.txt
+windows/runner/flutter_window.cpp
+windows/runner/flutter_window.h
+windows/runner/main.cpp
+windows/runner/utils.cpp
+windows/runner/utils.h
+windows/runner/win32_window.cpp
+windows/runner/win32_window.h
+windows/flutter/
