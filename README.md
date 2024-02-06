@@ -52,4 +52,3 @@ cd AntySmog
 
 3.Run the app on your device or an emulator.
 
-For more detailed instructions, please refer to the [official Android documentation](https://developer.android.com/studio).
